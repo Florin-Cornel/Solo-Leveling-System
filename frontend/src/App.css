@@ -1,34 +1,130 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Epic Grind - Gamified Productivity App Styles */
+
+/* Base App styles */
+.App {
+  min-height: 100vh;
+  background-color: #050505;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Task completed state */
+.task-completed {
+  position: relative;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.task-completed .strike-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  background-color: #52525b;
+  transform: translateY(-50%);
 }
 
-.App-link {
-    color: #61dafb;
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Selection color */
+::selection {
+  background-color: rgba(34, 211, 238, 0.3);
+  color: #fff;
+}
+
+/* Custom focus styles */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #22D3EE;
+  outline-offset: 2px;
+}
+
+/* Progress ring glow effects */
+.progress-glow-d { filter: drop-shadow(0 0 10px rgba(113, 113, 122, 0.5)); }
+.progress-glow-c { filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6)); }
+.progress-glow-b { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.7)); }
+.progress-glow-a { filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)); }
+.progress-glow-s { filter: drop-shadow(0 0 30px rgba(234, 179, 8, 0.9)); }
+
+/* Dialog overlay */
+[data-state="open"] > .dialog-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Button hover effects */
+.btn-glow:hover {
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.6);
+}
+
+/* Mission card hover glow */
+.mission-card:hover {
+  transform: translateX(2px);
+}
+
+/* Rank badge styles */
+.rank-badge {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Toast customization */
+[data-sonner-toast] {
+  font-family: 'Manrope', sans-serif !important;
+}
+
+/* Ensure proper z-index layering */
+.z-background { z-index: 0; }
+.z-content { z-index: 10; }
+.z-overlay { z-index: 50; }
+.z-modal { z-index: 100; }
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .progress-ring-container {
+    transform: scale(0.85);
+  }
+}
+
+/* Prevent text selection on interactive elements */
+button, 
+[role="button"] {
+  user-select: none;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+input,
+select,
+.transition-smooth {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card glass effect */
+.glass-card {
+  background: rgba(18, 18, 18, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Scrollbar for mission list */
+.mission-list-scroll {
+  max-height: calc(100vh - 500px);
+  overflow-y: auto;
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
