@@ -131,7 +131,7 @@ const MissionItem = ({ mission, onToggle, onDelete, isJustCompleted = false }) =
         variant="ghost"
         size="icon"
         onClick={() => onDelete(mission.id)}
-        className="h-10 w-10 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
+        className="h-10 w-10 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0"
         data-testid={`mission-delete-${mission.id}`}
         aria-label="Delete mission"
       >
