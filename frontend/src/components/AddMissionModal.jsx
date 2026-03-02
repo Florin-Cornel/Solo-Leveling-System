@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '../components/ui/dialog';
 import {
   Select,
@@ -74,6 +75,9 @@ const AddMissionModal = ({ onAddMission }) => {
           <DialogTitle className="font-heading text-2xl font-bold tracking-tight">
             New Mission
           </DialogTitle>
+          <DialogDescription className="text-zinc-500">
+            Create a new task to track your progress and earn Runes
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
