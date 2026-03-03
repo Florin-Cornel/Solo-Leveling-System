@@ -1,46 +1,43 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+function getStorageValue(key, initialValue) {
+  try {
+    const item = window.localStorage.getItem(key);
+    return item !== null ? JSON.parse(item) : initialValue;
+  } catch (error) {
+    console.warn(`Error reading localStorage key "${key}":`, error);
+    return initialValue;
+  }
+}
 
 export function useLocalStorage(key, initialValue) {
-  // Use a ref to always have access to the latest stored value
-  const storedValueRef = useRef(null);
+  const [storedValue, setStoredValue] = useState(() => getStorageValue(key, initialValue));
 
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      const value = item ? JSON.parse(item) : initialValue;
-      storedValueRef.current = value;
-      return value;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      storedValueRef.current = initialValue;
-      return initialValue;
-    }
-  });
-
-  // Keep ref in sync with state
+  // Sync to localStorage whenever state changes
   useEffect(() => {
-    storedValueRef.current = storedValue;
-  }, [storedValue]);
-
-  const setValue = useCallback((value) => {
     try {
-      // Use ref to get latest value for function updates
-      const currentValue = storedValueRef.current;
-      const valueToStore = value instanceof Function ? value(currentValue) : value;
-      storedValueRef.current = valueToStore;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      window.localStorage.setItem(key, JSON.stringify(storedValue));
     } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
+      console.warn(`Error writing localStorage key "${key}":`, error);
     }
-  }, [key]);
+  }, [key, storedValue]);
 
+  // Stable setter that works with both direct values and updater functions
+  const setValue = useCallback((value) => {
+    setStoredValue((prev) => {
+      return typeof value === 'function' ? value(prev) : value;
+    });
+  }, []);
+
+  // Listen for storage changes from other tabs
   useEffect(() => {
     const handleStorageChange = (e) => {
-      if (e.key === key && e.newValue) {
-        const newValue = JSON.parse(e.newValue);
-        storedValueRef.current = newValue;
-        setStoredValue(newValue);
+      if (e.key === key && e.newValue !== null) {
+        try {
+          setStoredValue(JSON.parse(e.newValue));
+        } catch (error) {
+          console.warn(`Error parsing storage event:`, error);
+        }
       }
     };
 
