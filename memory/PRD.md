@@ -1,4 +1,4 @@
-# Epic Grind - Gamified Productivity App
+# Epic Grind - Gamified Productivity App v2
 
 ## Original Problem Statement
 Build a responsive, gamified personal productivity web app that tracks daily tasks, visualizes completion progress, and uses RPG mechanics (ranks and currency).
@@ -6,7 +6,7 @@ Build a responsive, gamified personal productivity web app that tracks daily tas
 ## Tech Stack
 - **Frontend**: React + Tailwind CSS
 - **Storage**: LocalStorage (no backend database)
-- **UI Components**: Shadcn UI
+- **UI Components**: Shadcn UI + Lucide Icons
 
 ## User Personas
 - Productivity enthusiasts who enjoy gamification
@@ -22,7 +22,9 @@ Build a responsive, gamified personal productivity web app that tracks daily tas
 6. Audio feedback on rune earning
 7. Strict dark mode theme
 
-## What's Been Implemented (March 2, 2026)
+## What's Been Implemented (v2 - March 3, 2026)
+
+### Phase 1 (v1 Complete)
 - [x] Header with Date Navigator (Previous/Next day buttons)
 - [x] Runes Wallet with glassmorphism styling
 - [x] Animated Progress Ring with glow effects
@@ -35,23 +37,40 @@ Build a responsive, gamified personal productivity web app that tracks daily tas
 - [x] Audio feedback (Web Audio API)
 - [x] Toast notifications (Sonner)
 - [x] LocalStorage persistence
-- [x] Elegant dark theme with Outfit/Manrope fonts
+
+### Phase 2 (v2 Complete)
+- [x] Background color changed to #131314 (softer dark gray)
+- [x] Anime character background on left side with fade effect
+- [x] Top Navigation Bar with 3 tabs
+- [x] Mission Log tab (original functionality)
+- [x] Reward Shop tab
+  - Custom reward creation (name, cost, color theme)
+  - 5 color themes: Red, Blue, Green, Purple, Gold
+  - Grid display with colored borders
+  - Buy button disabled when not enough runes
+- [x] Trophy Room tab
+  - 8 Achievement badges:
+    - Genin (20 missions), Jonin (50), Hokage (100)
+    - E-Rank Hunter (500 runes), Rune Scavenger (1000)
+    - S-Rank Hunter (5000), Elden Lord (10000), Shadow Monarch (25000)
+  - Locked achievements in grayscale with lock icon
+  - Progress bars showing advancement
+  - Lifetime mission and rune counters
+- [x] Delete icon always visible (not hover-only)
+- [x] Fixed useLocalStorage hook for proper state persistence
 
 ## User Choices Applied
 - Elegant dark theme (minimalist, subtle glows)
 - Smooth gradient fill + pulsing glow on progress ring
 - Clean, modern sans-serif fonts (Outfit headings, Manrope body)
 - Subtle audio feedback when earning Runes
+- Anime character background image
 
 ## Prioritized Backlog
-### P0 (Complete)
-- All core features implemented
-
 ### P1 (Future Enhancements)
-- Weekly/Monthly progress stats
+- Weekly/Monthly progress stats dashboard
 - Streak tracking for daily tasks
-- Runes shop to spend currency
-- Achievement badges
+- Achievement unlock animations/celebrations
 
 ### P2 (Nice to Have)
 - Export/Import data
@@ -60,6 +79,6 @@ Build a responsive, gamified personal productivity web app that tracks daily tas
 - PWA support
 
 ## Next Tasks
-1. Add weekly streak counter for motivation
-2. Create a "Runes Shop" to spend earned currency on themes/badges
-3. Add progress statistics dashboard
+1. Add celebration animation when unlocking achievements
+2. Weekly streak counter display
+3. Statistics dashboard with charts
