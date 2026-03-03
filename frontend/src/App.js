@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import '@/App.css';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { getDateKey, addDays, isBeforeOrSame } from './utils/dateUtils';
@@ -11,8 +11,11 @@ import MissionItem from './components/MissionItem';
 import AddMissionModal from './components/AddMissionModal';
 import RewardShop from './components/RewardShop';
 import TrophyRoom from './components/TrophyRoom';
+import RankUpAnimation from './components/RankUpAnimation';
+import PenaltyQuest from './components/PenaltyQuest';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
+import { Lock } from 'lucide-react';
 
 // Runes values for each rank
 const RUNES_VALUES = {
@@ -23,6 +26,9 @@ const RUNES_VALUES = {
   S: 200,
 };
 
+// Penalty quest options
+const PENALTY_QUESTS = ['pushups', 'squats', 'plank', 'burpees'];
+
 function App() {
   const [activeTab, setActiveTab] = useState('missions');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -32,10 +38,21 @@ function App() {
   const [lifetimeRunes, setLifetimeRunes] = useLocalStorage('epic-grind-lifetime-runes', 0);
   const [lifetimeMissions, setLifetimeMissions] = useLocalStorage('epic-grind-lifetime-missions', 0);
   const [rewards, setRewards] = useLocalStorage('epic-grind-rewards', []);
+  
+  // New state for special features
+  const [shadowBuffData, setShadowBuffData] = useLocalStorage('epic-grind-shadow-buff', {});
+  const [rankUpShown, setRankUpShown] = useLocalStorage('epic-grind-rankup-shown', {});
+  const [penaltyData, setPenaltyData] = useLocalStorage('epic-grind-penalty', { active: false });
+  
   const [runesAnimating, setRunesAnimating] = useState(false);
   const [justCompletedId, setJustCompletedId] = useState(null);
+  const [showRankUp, setShowRankUp] = useState(false);
 
   const dateKey = getDateKey(currentDate);
+  const today = getDateKey(new Date());
+
+  // Check if shadow buff is active for current day
+  const hasShadowBuff = shadowBuffData[dateKey] === true;
 
   // Get missions for current date (including recurring missions)
   const currentDayMissions = useMemo(() => {
@@ -54,6 +71,63 @@ function App() {
   const completedCount = currentDayMissions.filter(
     (m) => currentDayCompletions[m.id]
   ).length;
+
+  // Check for 100% completion and trigger rank up
+  const completionPercentage = currentDayMissions.length > 0 
+    ? Math.round((completedCount / currentDayMissions.length) * 100) 
+    : 0;
+
+  // Check penalty status on mount and date change
+  useEffect(() => {
+    const checkPenalty = () => {
+      // Only check for yesterday's penalty if it's a new day
+      const yesterday = getDateKey(addDays(new Date(), -1));
+      const yesterdayCompletions = completionData[yesterday] || {};
+      const yesterdayMissions = missions.filter((mission) => {
+        if (mission.isRecurring) {
+          return isBeforeOrSame(mission.createdDate, addDays(new Date(), -1));
+        }
+        return mission.dateKey === yesterday;
+      });
+      
+      const yesterdayCompletedCount = yesterdayMissions.filter(
+        (m) => yesterdayCompletions[m.id]
+      ).length;
+
+      // If yesterday had missions but fewer than 3 completed, and penalty not already active
+      if (yesterdayMissions.length > 0 && yesterdayCompletedCount < 3 && !penaltyData.active && !penaltyData.clearedDate) {
+        // Check if we already processed penalty for yesterday
+        if (penaltyData.lastCheckedDate !== yesterday) {
+          const randomQuest = PENALTY_QUESTS[Math.floor(Math.random() * PENALTY_QUESTS.length)];
+          setPenaltyData({
+            active: true,
+            questId: randomQuest,
+            triggeredDate: today,
+            lastCheckedDate: yesterday,
+          });
+          // Deduct 50 runes
+          setTotalRunes((prev) => Math.max(0, prev - 50));
+          toast.error('PENALTY MODE ACTIVATED!', {
+            description: 'You failed to complete 3 missions. -50 Runes.',
+            duration: 5000,
+          });
+        }
+      }
+    };
+
+    // Only check penalty if we have some history
+    if (Object.keys(completionData).length > 0) {
+      checkPenalty();
+    }
+  }, [today]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Trigger rank up animation when hitting 100%
+  useEffect(() => {
+    if (completionPercentage === 100 && currentDayMissions.length > 0 && !rankUpShown[dateKey]) {
+      setShowRankUp(true);
+      setRankUpShown((prev) => ({ ...prev, [dateKey]: true }));
+    }
+  }, [completionPercentage, currentDayMissions.length, dateKey, rankUpShown, setRankUpShown]);
 
   // Navigate to previous day
   const handlePrevDay = useCallback(() => {
@@ -88,7 +162,12 @@ function App() {
     if (!mission) return;
 
     const wasCompleted = currentDayCompletions[missionId];
-    const runeValue = RUNES_VALUES[mission.rank] || 10;
+    let runeValue = RUNES_VALUES[mission.rank] || 10;
+
+    // Apply shadow buff multiplier (1.5x) if active and this isn't an A/S rank mission
+    if (hasShadowBuff && !wasCompleted && mission.rank !== 'A' && mission.rank !== 'S') {
+      runeValue = Math.floor(runeValue * 1.5);
+    }
 
     setCompletionData((prev) => ({
       ...prev,
@@ -110,19 +189,33 @@ function App() {
         setJustCompletedId(null);
         setRunesAnimating(false);
       }, 400);
+
+      // Activate Shadow Buff for A/S rank completion
+      if ((mission.rank === 'A' || mission.rank === 'S') && !shadowBuffData[dateKey]) {
+        setShadowBuffData((prev) => ({ ...prev, [dateKey]: true }));
+        toast.success('SHADOW EXTRACTION!', {
+          description: '1.5x Rune Multiplier activated for today!',
+          duration: 4000,
+        });
+      }
       
-      toast.success(`+${runeValue} Runes earned!`, {
+      const displayRunes = hasShadowBuff && mission.rank !== 'A' && mission.rank !== 'S' 
+        ? `+${runeValue} Runes (1.5x Buff!)` 
+        : `+${runeValue} Runes earned!`;
+      
+      toast.success(displayRunes, {
         description: `${mission.rank}-Rank mission completed`,
       });
     } else {
-      // Uncompleting the mission
-      setTotalRunes((prev) => Math.max(0, prev - runeValue));
+      // Uncompleting the mission - use base value
+      const baseRuneValue = RUNES_VALUES[mission.rank] || 10;
+      setTotalRunes((prev) => Math.max(0, prev - baseRuneValue));
       playUncheckSound();
-      toast.info(`-${runeValue} Runes`, {
+      toast.info(`-${baseRuneValue} Runes`, {
         description: 'Mission marked incomplete',
       });
     }
-  }, [missions, currentDayCompletions, dateKey, setCompletionData, setTotalRunes, setLifetimeRunes, setLifetimeMissions]);
+  }, [missions, currentDayCompletions, dateKey, hasShadowBuff, shadowBuffData, setCompletionData, setTotalRunes, setLifetimeRunes, setLifetimeMissions, setShadowBuffData]);
 
   // Delete a mission
   const handleDeleteMission = useCallback((missionId) => {
@@ -173,14 +266,48 @@ function App() {
     setTimeout(() => setRunesAnimating(false), 400);
   }, [rewards, totalRunes, setTotalRunes]);
 
+  // Complete penalty quest
+  const handleCompletePenalty = useCallback(() => {
+    setPenaltyData({ 
+      active: false, 
+      clearedDate: today,
+      lastCheckedDate: penaltyData.lastCheckedDate 
+    });
+    toast.success('Penalty Quest Complete!', {
+      description: 'Access restored. Stay disciplined!',
+    });
+  }, [today, penaltyData.lastCheckedDate, setPenaltyData]);
+
+  // Handle tab change with penalty lock
+  const handleTabChange = useCallback((tabId) => {
+    if (penaltyData.active && (tabId === 'shop' || tabId === 'trophies')) {
+      toast.error('Access Locked!', {
+        description: 'Complete the Penalty Quest first.',
+      });
+      return;
+    }
+    setActiveTab(tabId);
+  }, [penaltyData.active]);
+
   // Add missions with completion status
   const missionsWithStatus = currentDayMissions.map((mission) => ({
     ...mission,
     completed: !!currentDayCompletions[mission.id],
   }));
 
+  // Determine background class based on penalty mode
+  const bgClass = penaltyData.active 
+    ? 'min-h-screen bg-gradient-to-b from-red-950/30 to-[#131314] text-white font-body'
+    : 'min-h-screen bg-[#131314] text-white font-body';
+
   return (
-    <div className="min-h-screen bg-[#131314] text-white font-body">
+    <div className={bgClass}>
+      {/* Rank Up Animation */}
+      <RankUpAnimation 
+        show={showRankUp} 
+        onComplete={() => setShowRankUp(false)} 
+      />
+
       {/* Anime character backgrounds */}
       <div className="anime-bg-left" />
       <div className="anime-bg-right" />
@@ -192,15 +319,79 @@ function App() {
       <header className="sticky top-0 z-50 bg-[#131314]/95 backdrop-blur-sm border-b border-zinc-800">
         {/* Runes Wallet */}
         <div className="flex justify-end px-4 py-3">
-          <RunesWallet runes={totalRunes} isAnimating={runesAnimating} />
+          <RunesWallet 
+            runes={totalRunes} 
+            isAnimating={runesAnimating} 
+            hasShadowBuff={hasShadowBuff}
+          />
         </div>
         
-        {/* Navigation */}
-        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Navigation with lock indicators */}
+        <nav 
+          className="flex items-center justify-center gap-2 bg-[#1a1a1b] border-b border-zinc-800 px-4 py-3"
+          data-testid="navigation"
+        >
+          <button
+            onClick={() => handleTabChange('missions')}
+            className={`
+              flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-base
+              transition-all duration-200
+              ${activeTab === 'missions' 
+                ? 'bg-runes/20 text-runes border border-runes/30' 
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+              }
+            `}
+            data-testid="nav-tab-missions"
+          >
+            Mission Log
+          </button>
+          
+          <button
+            onClick={() => handleTabChange('shop')}
+            className={`
+              flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-base
+              transition-all duration-200
+              ${activeTab === 'shop' 
+                ? 'bg-runes/20 text-runes border border-runes/30' 
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+              }
+              ${penaltyData.active ? 'opacity-50' : ''}
+            `}
+            data-testid="nav-tab-shop"
+          >
+            {penaltyData.active && <Lock className="w-4 h-4 text-red-400" />}
+            Reward Shop
+          </button>
+          
+          <button
+            onClick={() => handleTabChange('trophies')}
+            className={`
+              flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-base
+              transition-all duration-200
+              ${activeTab === 'trophies' 
+                ? 'bg-runes/20 text-runes border border-runes/30' 
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+              }
+              ${penaltyData.active ? 'opacity-50' : ''}
+            `}
+            data-testid="nav-tab-trophies"
+          >
+            {penaltyData.active && <Lock className="w-4 h-4 text-red-400" />}
+            Trophy Room
+          </button>
+        </nav>
       </header>
 
-      {/* Main container */}
-      <main className="max-w-2xl mx-auto px-4 py-6 relative z-10">
+      {/* Main container with content overlay for clean center */}
+      <main className="content-overlay max-w-2xl mx-auto px-4 py-6 relative z-10">
+        {/* Penalty Quest Banner */}
+        {penaltyData.active && (
+          <PenaltyQuest 
+            penaltyData={penaltyData} 
+            onCompletePenalty={handleCompletePenalty}
+          />
+        )}
+
         {/* Mission Log Tab */}
         {activeTab === 'missions' && (
           <div className="space-y-6">

@@ -82,11 +82,12 @@ code {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: left bottom;
-  opacity: 0.35;
+  opacity: 0.65;
+  filter: saturate(1.5) contrast(1.1);
   pointer-events: none;
   z-index: 1;
-  mask-image: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  mask-image: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
 }
 
 .anime-bg-right {
@@ -99,18 +100,31 @@ code {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: right bottom;
-  opacity: 0.35;
+  opacity: 0.65;
+  filter: saturate(1.5) contrast(1.1);
   pointer-events: none;
   z-index: 1;
-  mask-image: linear-gradient(to left, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  mask-image: linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+}
+
+/* Central content overlay for clean text area */
+.content-overlay {
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(to right, 
+    transparent 0%, 
+    #131314 15%, 
+    #131314 85%, 
+    transparent 100%
+  );
 }
 
 @media (max-width: 768px) {
   .anime-bg-left,
   .anime-bg-right {
     width: 180px;
-    opacity: 0.2;
+    opacity: 0.5;
   }
 }
 
