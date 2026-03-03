@@ -71,28 +71,46 @@ code {
   z-index: 9999;
 }
 
-/* Anime character background */
-.anime-bg {
+/* Anime character backgrounds */
+.anime-bg-left {
   position: fixed;
   left: 0;
   top: 0;
   height: 100vh;
   width: 400px;
-  background-image: url('https://pnganime.com/web/image-thumbnails/321/637-lg.png');
+  background-image: url('https://i.imgur.com/qo1IukQ.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: left bottom;
-  opacity: 0.4;
+  opacity: 0.35;
   pointer-events: none;
   z-index: 1;
-  mask-image: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+  mask-image: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+}
+
+.anime-bg-right {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 400px;
+  background-image: url('https://i.imgur.com/kgmEZbl.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 1;
+  mask-image: linear-gradient(to left, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
 }
 
 @media (max-width: 768px) {
-  .anime-bg {
-    width: 200px;
-    opacity: 0.25;
+  .anime-bg-left,
+  .anime-bg-right {
+    width: 180px;
+    opacity: 0.2;
   }
 }
 

@@ -181,8 +181,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#131314] text-white font-body">
-      {/* Anime character background */}
-      <div className="anime-bg" />
+      {/* Anime character backgrounds */}
+      <div className="anime-bg-left" />
+      <div className="anime-bg-right" />
       
       {/* Noise texture overlay */}
       <div className="noise-overlay" />
