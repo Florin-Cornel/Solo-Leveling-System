@@ -10,8 +10,9 @@ import DateNavigator from './components/DateNavigator';
 import MissionItem from './components/MissionItem';
 import AddMissionModal from './components/AddMissionModal';
 import RewardShop from './components/RewardShop';
-import TrophyRoom from './components/TrophyRoom';
+import TrophyRoom, { HUNTER_RANKS } from './components/TrophyRoom';
 import RankUpAnimation from './components/RankUpAnimation';
+import HunterRankUpModal from './components/HunterRankUpModal';
 import PenaltyQuest from './components/PenaltyQuest';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
@@ -42,11 +43,14 @@ function App() {
   // New state for special features
   const [shadowBuffData, setShadowBuffData] = useLocalStorage('epic-grind-shadow-buff', {});
   const [rankUpShown, setRankUpShown] = useLocalStorage('epic-grind-rankup-shown', {});
+  const [hunterRankAchieved, setHunterRankAchieved] = useLocalStorage('epic-grind-hunter-rank-achieved', ['e-rank']);
   const [penaltyData, setPenaltyData] = useLocalStorage('epic-grind-penalty', { active: false });
   
   const [runesAnimating, setRunesAnimating] = useState(false);
   const [justCompletedId, setJustCompletedId] = useState(null);
   const [showRankUp, setShowRankUp] = useState(false);
+  const [showHunterRankUp, setShowHunterRankUp] = useState(false);
+  const [newHunterRank, setNewHunterRank] = useState(null);
 
   const dateKey = getDateKey(currentDate);
   const today = getDateKey(new Date());
@@ -179,6 +183,8 @@ function App() {
 
     if (!wasCompleted) {
       // Completing the mission
+      const newLifetimeMissions = lifetimeMissions + 1;
+      
       setTotalRunes((prev) => prev + runeValue);
       setLifetimeRunes((prev) => prev + runeValue);
       setLifetimeMissions((prev) => prev + 1);
@@ -189,6 +195,16 @@ function App() {
         setJustCompletedId(null);
         setRunesAnimating(false);
       }, 400);
+
+      // Check for Hunter Rank Up
+      const newRank = HUNTER_RANKS.find(r => 
+        r.threshold === newLifetimeMissions && !hunterRankAchieved.includes(r.id)
+      );
+      if (newRank) {
+        setNewHunterRank(newRank);
+        setShowHunterRankUp(true);
+        setHunterRankAchieved((prev) => [...prev, newRank.id]);
+      }
 
       // Activate Shadow Buff for A/S rank completion
       if ((mission.rank === 'A' || mission.rank === 'S') && !shadowBuffData[dateKey]) {
@@ -215,7 +231,7 @@ function App() {
         description: 'Mission marked incomplete',
       });
     }
-  }, [missions, currentDayCompletions, dateKey, hasShadowBuff, shadowBuffData, setCompletionData, setTotalRunes, setLifetimeRunes, setLifetimeMissions, setShadowBuffData]);
+  }, [missions, currentDayCompletions, dateKey, hasShadowBuff, shadowBuffData, lifetimeMissions, hunterRankAchieved, setCompletionData, setTotalRunes, setLifetimeRunes, setLifetimeMissions, setShadowBuffData, setHunterRankAchieved]);
 
   // Delete a mission
   const handleDeleteMission = useCallback((missionId) => {
@@ -302,10 +318,20 @@ function App() {
 
   return (
     <div className={bgClass}>
-      {/* Rank Up Animation */}
+      {/* Rank Up Animation (100% daily completion) */}
       <RankUpAnimation 
         show={showRankUp} 
         onComplete={() => setShowRankUp(false)} 
+      />
+
+      {/* Hunter Rank Up Modal */}
+      <HunterRankUpModal
+        show={showHunterRankUp}
+        rankData={newHunterRank}
+        onClose={() => {
+          setShowHunterRankUp(false);
+          setNewHunterRank(null);
+        }}
       />
 
       {/* Anime character backgrounds */}
