@@ -1,6 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
+  "homepage": "https://florin-cornel.github.io/Solo-Leveling-System",
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
