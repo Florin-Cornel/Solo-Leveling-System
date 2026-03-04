@@ -6,6 +6,9 @@ require("dotenv").config();
 // Craco sets NODE_ENV=development for start, NODE_ENV=production for build
 const isDevServer = process.env.NODE_ENV !== "production";
 
+// Get PUBLIC_URL for GitHub Pages deployment
+const publicUrl = process.env.PUBLIC_URL || "";
+
 // Environment variable overrides
 const config = {
   enableHealthCheck: process.env.ENABLE_HEALTH_CHECK === "true",
@@ -47,6 +50,10 @@ const webpackConfig = {
       '@': path.resolve(__dirname, 'src'),
     },
     configure: (webpackConfig) => {
+      // Set output public path for GitHub Pages
+      if (publicUrl) {
+        webpackConfig.output.publicPath = publicUrl + "/";
+      }
 
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {
