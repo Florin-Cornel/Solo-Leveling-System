@@ -178,7 +178,7 @@ const RewardShop = ({ rewards, onAddReward, onBuyReward, onDeleteReward, totalRu
                     {name || 'Your reward name'}
                   </span>
                   <div className="flex items-center gap-1 text-runes">
-                    <Gem className="w-4 h-4" />
+                    <GoldenRune size={16} />
                     <span className="font-bold">{cost || '0'}</span>
                   </div>
                 </div>
