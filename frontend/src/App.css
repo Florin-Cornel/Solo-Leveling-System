@@ -41,36 +41,36 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch Final Inward Push --- */
+/* --- Shadow Monarch Absolute Positioning --- */
 body::before,
 body::after {
   content: "";
   position: fixed;
   top: 100px;
   bottom: 0;
-  width: 35vw; 
+  width: 32vw; /* Slightly narrower to prevent overlap */
   z-index: -1;
   pointer-events: none;
   background-size: contain;
   background-repeat: no-repeat;
-  opacity: 0.8;
-  filter: brightness(1.1) contrast(1.1) saturate(1.2);
+  opacity: 0.85;
+  filter: brightness(1.1) contrast(1.1) saturate(1.3);
 }
 
-/* Jin-Woo - Calculated from center-left */
+/* Jin-Woo - Moving inward from the left */
 body::before {
-  /* This says: Start at the middle (50%) and move 650 pixels to the left */
-  left: calc(50% - 650px); 
+  /* 0vw is the far left. 15vw pushes him significantly toward the middle. */
+  left: 15vw !important; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
-  background-position: center top;
+  background-position: left top;
 }
 
-/* Igris - Calculated from center-right */
+/* Igris - Moving inward from the right */
 body::after {
-  /* This says: Start at the middle (50%) and move 250 pixels to the right */
-  left: calc(50% + 250px); 
+  /* 0vw is the far right. 15vw pushes him significantly toward the middle. */
+  right: 15vw !important; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
-  background-position: center top;
+  background-position: right top;
 }
 
 /* --- FORCE TRANSPARENCY ON ALL LAYERS --- */
