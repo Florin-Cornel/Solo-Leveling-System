@@ -16,24 +16,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install and Build
+      - name: Find and Build
         run: |
-          if [ -d "frontend" ]; then
-            cd frontend
-            npm install
-            npm run build
-            cp -r dist ../ || cp -r build ../ || true
-            cd ..
-          else
-            npm install
-            npm run build
-          fi
+          # Search for the folder containing vite.config.js
+          TARGET_DIR=$(find . -name "vite.config.js" -exec dirname {} \;)
+          echo "Found project in: $TARGET_DIR"
+          cd "$TARGET_DIR"
+          npm install
+          npm run build
+          # Move the results to the root so GitHub can find them
+          mkdir -p $GITHUB_WORKSPACE/out_delivery
+          cp -r dist/* $GITHUB_WORKSPACE/out_delivery/ || cp -r build/* $GITHUB_WORKSPACE/out_delivery/ || true
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: './out_delivery'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
