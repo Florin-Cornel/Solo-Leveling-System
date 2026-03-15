@@ -18,11 +18,13 @@ jobs:
           node-version: '20'
       - name: Find and Build
         run: |
-          # This command finds the package.json that belongs to your site
+          # Find the package.json that belongs to your site
           TARGET_DIR=$(find . -maxdepth 2 -name "package.json" -exec grep -l "dependencies" {} + | head -n 1 | xargs dirname)
           echo "Targeting directory: $TARGET_DIR"
           cd "$TARGET_DIR"
           npm install --legacy-peer-deps
+          # INJECT THE MISSING MODULE HERE
+          npm install ajv@^8 --legacy-peer-deps
           npm run build
           # Ensure the output is moved to a known location
           mkdir -p $GITHUB_WORKSPACE/deploy_ready
