@@ -408,10 +408,10 @@ function App() {
     : 'min-h-screen bg-[#131314] text-white font-body';
 
   return (
-    <div className={bgClass}>
-      {/* Shadow Monarch Backgrounds */}
+   <div className={bgClass}>
       <div className="anime-bg-left" />
       <div className="anime-bg-right" />
+      
 
       {/* Rank Up Animation (100% daily completion) */}
       <RankUpAnimation

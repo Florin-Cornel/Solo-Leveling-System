@@ -41,31 +41,37 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch Character Styles (The Awakening) --- */
+/* --- Final Shadow Monarch Backgrounds --- */
 .anime-bg-left, .anime-bg-right {
   position: fixed;
-  top: 0; 
+  top: 0;
+  bottom: 0;
   height: 100vh;
-  width: 48%; /* Large, intimidating presence */
-  z-index: 0; 
+  width: 50%; /* Maximized size */
+  z-index: 1; /* Moves them in front of the black background */
   pointer-events: none;
   background-size: contain;
   background-repeat: no-repeat;
-  opacity: 0.9; /* High visibility */
-  filter: brightness(1.2) contrast(1.1) saturate(1.3) drop-shadow(0 0 30px rgba(139, 92, 246, 0.2));
-  transition: all 0.5s ease-in-out;
+  opacity: 0.9;
+  filter: brightness(1.2) contrast(1.1) saturate(1.4);
 }
 
 .anime-bg-left {
-  left: -5%; 
+  left: 0;
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
   background-position: left center;
 }
 
 .anime-bg-right {
-  right: -5%; 
+  right: 0;
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
   background-position: right center;
+}
+
+/* This ensures your missions and level bar stay ON TOP of the characters */
+main, .relative.z-10, .max-w-7xl {
+  position: relative;
+  z-index: 10 !important; 
 }
 
 /* --- Header Button Transformation --- */
