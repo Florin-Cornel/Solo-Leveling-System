@@ -34,17 +34,17 @@ jobs:
           node-version: '20'
       
       - name: Install and Build
-        run: cd frontend && npm install && npm run build
-        env:
-          CI: false
+  run: |
+    npm install
+    npm run build
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'frontend/dist'
+       with:
+  path: './dist'
 
   # Deployment job
   deploy:
