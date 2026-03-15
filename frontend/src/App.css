@@ -147,14 +147,14 @@ select,
 }
 
 .anime-bg-left {
-  left: -2%; /* Slightly adjusted for better centering */
-  background-image: url('./assets/jinwoo-bg.png'); /* Using local asset path */
+  left: -2%; 
+  background-image: url('/jinwoo-bg.png'); /* Removed ./assets/ */
   background-position: left center;
 }
 
 .anime-bg-right {
-  right: -2%; /* Slightly adjusted for better centering */
-  background-image: url('./assets/igris-bg.png'); /* Using local asset path */
+  right: -2%; 
+  background-image: url('/igris-bg.png'); /* Removed ./assets/ */
   background-position: right center;
 }
 
