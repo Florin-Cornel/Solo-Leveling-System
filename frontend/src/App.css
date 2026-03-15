@@ -41,32 +41,44 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Manifestation: Transparency Fix --- */
-div.min-h-screen.bg-\[\#131314\] {
-  background-color: rgba(19, 19, 20, 0.7) !important; /* Makes the black 70% transparent */
-  backdrop-filter: blur(4px); /* Adds a cool frost effect */
-}
-
+/* --- Shadow Monarch Final Scaling --- */
 .anime-bg-left, 
 .anime-bg-right {
   position: fixed !important;
-  top: 0 !important;
+  /* Nudges them down so heads/swords don't hit the top bar */
+  top: 80px !important; 
   bottom: 0 !important;
-  height: 100vh !important;
-  width: 45vw !important; 
-  z-index: -1 !important; /* Move them BEHIND the transparent wall */
+  /* Scaled down from 45vw to 38vw to prevent crowding the center */
+  width: 38vw !important; 
+  z-index: -1 !important;
   pointer-events: none !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
-  opacity: 1 !important; /* Full power */
+  opacity: 0.9 !important;
+  filter: brightness(1.1) contrast(1.1) saturate(1.3) !important;
   display: block !important;
+  transition: all 0.4s ease;
 }
 
-/* Ensure the absolute back of the page is still black */
-body {
-  background-color: #000 !important;
+.anime-bg-left {
+  /* Added a 2% gap from the left edge */
+  left: 2% !important;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png") !important;
+  background-position: left top !important;
 }
 
+.anime-bg-right {
+  /* Added a 2% gap from the right edge */
+  right: 2% !important;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png") !important;
+  background-position: right top !important;
+}
+
+/* Transparency tweak to ensure center readability */
+div.min-h-screen.bg-\[\#131314\] {
+  background-color: rgba(19, 19, 20, 0.65) !important;
+  backdrop-filter: blur(8px);
+}
 /* --- Header Button Transformation --- */
 /* This targets the AddMission button once moved into the flex container */
 .flex.justify-center.mb-6 .fixed.bottom-8.right-8 {
