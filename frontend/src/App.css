@@ -41,14 +41,14 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch Final Positioning --- */
+/* --- Shadow Monarch Final Inward Push --- */
 body::before,
 body::after {
   content: "";
   position: fixed;
   top: 100px;
   bottom: 0;
-  width: 35vw; /* Slightly smaller so they don't crowd the screen */
+  width: 35vw; 
   z-index: -1;
   pointer-events: none;
   background-size: contain;
@@ -57,20 +57,18 @@ body::after {
   filter: brightness(1.1) contrast(1.1) saturate(1.2);
 }
 
-/* Jin-Woo - Moving inward from the left */
+/* Jin-Woo - Pushed from the left */
 body::before {
-  left: 0;
-  /* INCREASE this number to move him CLOSER to the center */
-  margin-left: 250px; 
+  /* INCREASE this % to move him CLOSER to the middle */
+  left: 10%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
   background-position: left top;
 }
 
-/* Igris - Moving inward from the right */
+/* Igris - Pushed from the right */
 body::after {
-  right: 0;
-  /* INCREASE this number to move him CLOSER to the center */
-  margin-right: 250px; 
+  /* INCREASE this % to move him CLOSER to the middle */
+  right: 10%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
   background-position: right top;
 }
