@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Trash2, Check } from 'lucide-react';
+import { Trash2, Check, Zap } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import EldenRune from './EldenRune';
 
 const RANK_STYLES = {
   D: {
@@ -48,9 +49,29 @@ const RANK_LABELS = {
   S: 'Epic',
 };
 
+// XP rewards per rank
+const XP_REWARDS = {
+  D: 50,
+  C: 100,
+  B: 200,
+  A: 350,
+  S: 500,
+};
+
+// Rune rewards per rank
+const RUNE_REWARDS = {
+  D: 10,
+  C: 20,
+  B: 50,
+  A: 100,
+  S: 200,
+};
+
 const MissionItem = ({ mission, onToggle, onDelete, isJustCompleted = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const style = RANK_STYLES[mission.rank] || RANK_STYLES.D;
+  const xpReward = XP_REWARDS[mission.rank] || 50;
+  const runeReward = RUNE_REWARDS[mission.rank] || 10;
   
   return (
     <div
@@ -110,13 +131,27 @@ const MissionItem = ({ mission, onToggle, onDelete, isJustCompleted = false }) =
               />
             )}
           </div>
-          <div className="flex items-center gap-2 mt-1">
+          
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
             <span className={`text-sm font-semibold ${style.text}`}>
               {mission.rank}-Rank
             </span>
             <span className="text-xs text-zinc-500">
               ({RANK_LABELS[mission.rank]})
             </span>
+            
+            {/* Rewards Display */}
+            <div className="flex items-center gap-3 ml-auto">
+              <div className="flex items-center gap-1 text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">
+                <Zap className="w-3 h-3" />
+                <span className="text-xs font-bold">+{xpReward} XP</span>
+              </div>
+              <div className="flex items-center gap-1 text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded">
+                <EldenRune size={14} />
+                <span className="text-xs font-bold">+{runeReward}</span>
+              </div>
+            </div>
+            
             {mission.isRecurring && (
               <span className="text-xs text-zinc-600 px-2 py-0.5 bg-zinc-800 rounded">
                 Daily
@@ -141,4 +176,5 @@ const MissionItem = ({ mission, onToggle, onDelete, isJustCompleted = false }) =
   );
 };
 
+export { XP_REWARDS, RUNE_REWARDS };
 export default MissionItem;

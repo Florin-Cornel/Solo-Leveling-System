@@ -1,5 +1,5 @@
 import React from 'react';
-import GoldenRune from './GoldenRune';
+import EldenRune from './EldenRune';
 import { Sparkles } from 'lucide-react';
 
 const RunesWallet = ({ runes, isAnimating = false, hasShadowBuff = false }) => {
@@ -21,17 +21,18 @@ const RunesWallet = ({ runes, isAnimating = false, hasShadowBuff = false }) => {
       <div 
         className={`
           flex items-center gap-2 
-          bg-white/5 backdrop-blur-sm 
-          border border-white/10 
+          bg-gradient-to-r from-yellow-900/30 to-amber-900/20
+          border border-yellow-600/40
           px-4 py-2 rounded-full
           transition-all duration-300
-          ${isAnimating ? 'runes-pop' : ''}
+          ${isAnimating ? 'runes-pop scale-110' : ''}
         `}
+        style={{ boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)' }}
         data-testid="runes-wallet"
       >
-        <GoldenRune size={22} />
-        <span className="font-heading font-bold text-lg text-white tracking-wide">
-          <span className="text-zinc-400 font-body font-medium mr-1">Runes:</span>
+        <EldenRune size={28} />
+        <span className="font-heading font-bold text-lg tracking-wide">
+          <span className="text-yellow-200/70 font-body font-medium mr-1">Runes:</span>
           <span data-testid="runes-count" className="text-yellow-400">{runes.toLocaleString()}</span>
         </span>
       </div>

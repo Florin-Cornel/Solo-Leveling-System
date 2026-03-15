@@ -219,6 +219,119 @@ code {
   }
 }
 
+/* Elden Rune pulse animation */
+.elden-rune-pulse {
+  animation: eldenPulse 2s ease-in-out infinite;
+}
+
+@keyframes eldenPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.9));
+    transform: scale(1.05);
+  }
+}
+
+/* XP Bar shimmer animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes xpShine {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Purple flash for level up */
+@keyframes purpleFlash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+/* Particle float animation */
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Text glow animation */
+@keyframes textGlow {
+  0% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.6); }
+  100% { text-shadow: 0 0 60px rgba(168, 85, 247, 1), 0 0 100px rgba(168, 85, 247, 0.5); }
+}
+
+/* Slide-in animations for menus */
+.slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.4s ease-out;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 @layer base {
   [data-debug-wrapper="true"] {
     display: contents !important;
