@@ -58,18 +58,27 @@ body::after {
   filter: brightness(1.1) contrast(1.1) saturate(1.2);
 }
 
-/* Jin-Woo on the Left */
+/* Jin-Woo - Moving further to the center */
 body::before {
-  left: 2%;
+  /* Changed from 2% to 12% to bring him closer to your missions */
+  left: 12%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
   background-position: left top;
 }
 
-/* Igris on the Right */
+/* Igris - Moving further to the center */
 body::after {
-  right: 2%;
+  /* Changed from 2% to 12% to bring him closer to your missions */
+  right: 12%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
   background-position: right top;
+}
+
+/* Optional: If they feel too small while moving inward, 
+   you can increase width from 35vw to 40vw */
+body::before,
+body::after {
+  width: 40vw; 
 }
 
 /* --- FORCE TRANSPARENCY ON ALL LAYERS --- */
