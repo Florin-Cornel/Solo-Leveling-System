@@ -41,50 +41,47 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch Final Scaling & Layering --- */
-.anime-bg-left, 
-.anime-bg-right {
-  position: fixed !important;
-  /* Lowered to 100px to clear the top bar completely */
-  top: 100px !important; 
-  bottom: 0 !important;
-  width: 35vw !important; /* Slightly smaller to prevent overlap */
-  /* Z-INDEX 1: Sits right above the black but behind all text */
-  z-index: 1 !important; 
-  pointer-events: none !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  opacity: 0.9 !important;
-  filter: brightness(1.1) contrast(1.1) saturate(1.3) !important;
-  display: block !important;
-  
+/* --- The Shadow Monarch's Decree (Permanent Background) --- */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  /* This pushes them down 100px from the top bar */
+  top: 100px; 
+  bottom: 0;
+  width: 35vw;
+  z-index: -1;
+  pointer-events: none;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.8;
+  filter: brightness(1.1) contrast(1.1) saturate(1.2);
 }
 
-.anime-bg-left {
-  left: 1% !important;
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png") !important;
-  background-position: left top !important;
+/* Jin-Woo on the Left */
+body::before {
+  left: 2%;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
+  background-position: left top;
 }
 
-.anime-bg-right {
-  right: 1% !important;
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png") !important;
-  background-position: right top !important;
+/* Igris on the Right */
+body::after {
+  right: 2%;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
+  background-position: right top;
 }
 
-/* THE CRITICAL FIX: Ensures the main background doesn't cover the shadows */
-.App, #root, [className*="bg-[#131314]"] {
+/* --- FORCE TRANSPARENCY ON ALL LAYERS --- */
+#root, .App, [class*="bg-[#131314]"], main {
   background-color: transparent !important;
+  background-image: none !important;
 }
 
+/* Set the true base color to the body so the images sit on top of it */
 body {
-  background-color: #131314 !important; /* Move the black color to the absolute bottom layer */
-}
-
-/* Keeps your content readable and on top */
-main, .max-w-7xl, .header-container {
-  position: relative !important;
-  z-index: 10 !important;
+  background-color: #131314 !important;
+  margin: 0;
 }
 /* --- Header Button Transformation --- */
 /* This targets the AddMission button once moved into the flex container */

@@ -409,9 +409,7 @@ function App() {
 
   return (
    <div className={bgClass}>
-      <div className="anime-bg-left" />
-      <div className="anime-bg-right" />
-      
+    
 
       {/* Rank Up Animation (100% daily completion) */}
       <RankUpAnimation
