@@ -41,40 +41,41 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch: Split-Screen Center Alignment --- */
+/* --- Shadow Monarch: Center-Anchor Math --- */
 body::before,
 body::after {
   content: "";
-  position: fixed;
-  top: 100px;
-  bottom: 0;
-  /* We give each character exactly HALF the screen */
-  width: 50vw !important; 
-  z-index: -1;
-  pointer-events: none;
-  /* We force a specific size so it stops fighting the container limits */
-  background-size: 30vw auto !important; 
+  position: fixed !important;
+  top: 100px !important;
+  bottom: 0 !important;
+  /* Fixed width guarantees they don't shrink or stretch weirdly */
+  width: 400px !important; 
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background-size: contain !important;
   background-repeat: no-repeat !important;
   opacity: 0.85 !important;
   filter: brightness(1.1) contrast(1.1) saturate(1.3) !important;
 }
 
-/* Jin-Woo (Left Half) */
+/* Jin-Woo - Anchored to center, pulled Left */
 body::before {
-  left: 0 !important;
+  left: 50% !important;
+  /* Pulls him exactly 650 pixels to the left of the center line */
+  margin-left: -650px !important; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png") !important;
-  /* 100% touches the center line. 85% pulls him back slightly so he doesn't overlap text. */
-  /* INCREASE this number (e.g., to 95%) to move him closer to center */
-  background-position: 85% top !important; 
+  /* Aligns him to the inner edge of his box */
+  background-position: right top !important; 
 }
 
-/* Igris (Right Half) */
+/* Igris - Anchored to center, pushed Right */
 body::after {
-  right: 0 !important;
+  left: 50% !important;
+  /* Pushes him exactly 250 pixels to the right of the center line */
+  margin-left: 250px !important; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png") !important;
-  /* 0% touches the center line. 15% pushes him back slightly. */
-  /* DECREASE this number (e.g., to 5%) to move him closer to center */
-  background-position: 15% top !important; 
+  /* Aligns him to the inner edge of his box */
+  background-position: left top !important;
 }
 
 /* --- FORCE TRANSPARENCY ON ALL LAYERS --- */
