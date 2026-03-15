@@ -61,7 +61,7 @@ body::after {
 /* Jin-Woo - Moving further to the center */
 body::before {
   /* Changed from 2% to 12% to bring him closer to your missions */
-  left: 30%; 
+  left: 70%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
   background-position: left top;
 }
@@ -69,7 +69,7 @@ body::before {
 /* Igris - Moving further to the center */
 body::after {
   /* Changed from 2% to 12% to bring him closer to your missions */
-  right: 30%; 
+  right: 70%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
   background-position: right top;
 }
