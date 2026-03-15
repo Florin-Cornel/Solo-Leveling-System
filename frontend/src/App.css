@@ -41,40 +41,38 @@ html {
   z-index: 10;
 }
 
-/* --- The Shadow Monarch's Decree (Center Alignment) --- */
+/* --- Shadow Monarch Final Positioning --- */
 body::before,
 body::after {
   content: "";
   position: fixed;
   top: 100px;
   bottom: 0;
-  width: 450px; /* Using pixels for stability */
+  width: 35vw; /* Slightly smaller so they don't crowd the screen */
   z-index: -1;
   pointer-events: none;
   background-size: contain;
   background-repeat: no-repeat;
   opacity: 0.8;
   filter: brightness(1.1) contrast(1.1) saturate(1.2);
-  /* The Secret Sauce: Anchor to center */
-  left: 50%;
 }
 
-/* Jin-Woo - Pulled to the left of center */
+/* Jin-Woo - Moving inward from the left */
 body::before {
+  left: 0;
+  /* INCREASE this number to move him CLOSER to the center */
+  margin-left: 120px; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
-  background-position: center top;
-  /* Adjust the -600px to move him closer or further. 
-     A smaller negative number (like -500px) moves him CLOSER to the middle. */
-  transform: translateX(-650px); 
+  background-position: left top;
 }
 
-/* Igris - Pulled to the right of center */
+/* Igris - Moving inward from the right */
 body::after {
+  right: 0;
+  /* INCREASE this number to move him CLOSER to the center */
+  margin-right: 120px; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
-  background-position: center top;
-  /* Adjust the 150px to move him closer or further.
-     A smaller number (like 50px) moves him CLOSER to the middle. */
-  transform: translateX(200px);
+  background-position: right top;
 }
 
 /* --- FORCE TRANSPARENCY ON ALL LAYERS --- */
