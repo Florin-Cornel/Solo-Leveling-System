@@ -260,12 +260,26 @@ function App() {
       });
     } else {
       // --- UNCOMPLETING THE MISSION (THE PENALTY) ---
-      // We subtract the SAME values we added, ensuring the stats reflect the truth
+      const newTotalXP = Math.max(0, totalXP - xpValue);
+      // We calculate the level based on the NEW xp total to ensure the truth
+      const newLevel = getLevelFromXP(newTotalXP); 
+      
       setTotalRunes((prev) => Math.max(0, prev - runeValue));
       setLifetimeRunes((prev) => Math.max(0, prev - runeValue));
       setLifetimeMissions((prev) => Math.max(0, prev - 1));
-      setTotalXP((prev) => Math.max(0, prev - xpValue));
+      setTotalXP(newTotalXP);
+      setCurrentLevel(newLevel); // This is the key: it forces the level to drop if needed
       
+      setMissionCounts((prev) => ({
+        ...prev,
+        [mission.rank]: Math.max(0, (prev[mission.rank] || 0) - 1),
+      }));
+
+      playUncheckSound();
+      toast.info(`-${xpValue} XP | -${runeValue} Runes`, {
+        description: 'Mission revoked. Level adjusted.',
+      });
+    }
       // Remove from rank counts
       setMissionCounts((prev) => ({
         ...prev,
