@@ -409,8 +409,12 @@ function App() {
 
   return (
     <div className={bgClass}>
+      {/* Shadow Monarch Backgrounds */}
+      <div className="anime-bg-left" />
+      <div className="anime-bg-right" />
+
       {/* Rank Up Animation (100% daily completion) */}
-      <RankUpAnimation 
+      <RankUpAnimation
         show={showRankUp} 
         onComplete={() => setShowRankUp(false)} 
       />

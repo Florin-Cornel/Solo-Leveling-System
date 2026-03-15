@@ -4,6 +4,7 @@
 .App {
   min-height: 100vh;
   background-color: #131314;
+  overflow-x: hidden; /* Prevents horizontal scrolling from large shadows */
 }
 
 /* Task completed state */
@@ -25,20 +26,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Selection color */
-::selection {
-  background-color: rgba(34, 211, 238, 0.3);
-  color: #fff;
-}
-
-/* Custom focus styles */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 2px solid #22D3EE;
-  outline-offset: 2px;
-}
-
 /* Progress ring glow effects */
 .progress-glow-d { filter: drop-shadow(0 0 10px rgba(113, 113, 122, 0.5)); }
 .progress-glow-c { filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6)); }
@@ -46,154 +33,76 @@ select:focus-visible {
 .progress-glow-a { filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)); }
 .progress-glow-s { filter: drop-shadow(0 0 30px rgba(234, 179, 8, 0.9)); }
 
-/* Dialog overlay */
-[data-state="open"] > .dialog-overlay {
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Button hover effects */
-.btn-glow:hover {
-  box-shadow: 0 0 25px rgba(34, 211, 238, 0.6);
-}
-
-/* Mission card hover glow */
-.mission-card:hover {
-  transform: translateX(2px);
-}
-
-/* Rank badge styles */
-.rank-badge {
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-/* Toast customization */
-[data-sonner-toast] {
-  font-family: 'Manrope', sans-serif !important;
-}
-
-/* Ensure proper z-index layering */
-.z-background { z-index: 0; }
-.z-content { z-index: 10; }
-.z-overlay { z-index: 50; }
-.z-modal { z-index: 100; }
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .progress-ring-container {
-    transform: scale(0.85);
-  }
-}
-
-/* Prevent text selection on interactive elements */
-button, 
-[role="button"] {
-  user-select: none;
-}
-
-/* Smooth transitions for interactive elements */
-button,
-input,
-select,
-.transition-smooth {
-  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
-  transition-duration: 200ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Card glass effect */
+/* Glass Card Effect for Center Content */
 .glass-card {
-  background: rgba(18, 18, 18, 0.8);
+  background: rgba(18, 18, 18, 0.85);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 10;
 }
 
-/* Scrollbar for mission list */
-.mission-list-scroll {
-  max-height: calc(100vh - 500px);
-  overflow-y: auto;
-}
-
-/* Hide scrollbar but keep functionality */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-/* --- Shadow Monarch Character Styles --- */
-
+/* --- Shadow Monarch Character Styles (The Awakening) --- */
 .anime-bg-left, .anime-bg-right {
   position: fixed;
-  top: 0; /* Moves them all the way to the top bar */
-  height: 100vh; /* Makes them full height of the screen */
-  width: 45%; /* Makes the images much larger */
-  z-index: -1; /* Keeps them behind your text */
+  top: 0; 
+  height: 100vh;
+  width: 48%; /* Large, intimidating presence */
+  z-index: 0; 
   pointer-events: none;
   background-size: contain;
   background-repeat: no-repeat;
-  
-  /* THE VIBRANCY BUFF */
-  opacity: 0.85; /* No longer "dusted" - very clear visibility */
-  filter: brightness(1.2) contrast(1.2) saturate(1.4) drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
+  opacity: 0.9; /* High visibility */
+  filter: brightness(1.2) contrast(1.1) saturate(1.3) drop-shadow(0 0 30px rgba(139, 92, 246, 0.2));
   transition: all 0.5s ease-in-out;
 }
 
 .anime-bg-left {
-  left: -2%; 
+  left: -5%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
   background-position: left center;
 }
 
 .anime-bg-right {
-  right: -2%; 
+  right: -5%; 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
   background-position: right center;
 }
 
-/* Ensure content stays readable */
-.content-overlay {
-  position: relative;
-  z-index: 10;
-  background: rgba(19, 19, 20, 0.7); /* Darkens the center slightly so characters don't distract */
-  backdrop-filter: blur(4px);
-  border-radius: 20px;
-  margin-top: 20px;
-  padding: 20px;
-}
-
-/* Mobile Fix: Hide them or shrink them on small phones so it's not messy */
-@media (max-width: 1024px) {
-  .anime-bg-left, .anime-bg-right {
-    opacity: 0.3;
-    width: 30%;
-  }
-}
 /* --- Header Button Transformation --- */
+/* This targets the AddMission button once moved into the flex container */
 .flex.justify-center.mb-6 .fixed.bottom-8.right-8 {
   position: static !important;
-  width: 240px !important;
-  height: 48px !important;
+  width: 260px !important;
+  height: 50px !important;
   border-radius: 12px !important;
   background: rgba(34, 211, 238, 0.1) !important;
-  border: 1px solid rgba(34, 211, 238, 0.4) !important;
+  border: 1px solid rgba(34, 211, 238, 0.5) !important;
   color: #22D3EE !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 10px !important;
-  font-weight: 700 !important;
-  box-shadow: 0 0 15px rgba(34, 211, 238, 0.1) !important;
+  gap: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.15) !important;
+  transition: all 0.3s ease;
+}
+
+.flex.justify-center.mb-6 .fixed.bottom-8.right-8:hover {
+  background: rgba(34, 211, 238, 0.2) !important;
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.3) !important;
+  transform: translateY(-2px);
 }
 
 .flex.justify-center.mb-6 .fixed.bottom-8.right-8::after {
   content: "NEW MISSION";
   font-size: 14px;
+}
+
+/* Mobile Fix */
+@media (max-width: 1024px) {
+  .anime-bg-left, .anime-bg-right {
+    opacity: 0.2; /* Fade them out on mobile to see text */
+    width: 40%;
+  }
 }
