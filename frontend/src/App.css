@@ -57,20 +57,20 @@ body::after {
   filter: brightness(1.1) contrast(1.1) saturate(1.2);
 }
 
-/* Jin-Woo - Pushed from the left */
+/* Jin-Woo - Calculated from center-left */
 body::before {
-  /* INCREASE this % to move him CLOSER to the middle */
-  left: 50%; 
+  /* This says: Start at the middle (50%) and move 650 pixels to the left */
+  left: calc(50% - 650px); 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
-  background-position: left top;
+  background-position: center top;
 }
 
-/* Igris - Pushed from the right */
+/* Igris - Calculated from center-right */
 body::after {
-  /* INCREASE this % to move him CLOSER to the middle */
-  right: 50%; 
+  /* This says: Start at the middle (50%) and move 250 pixels to the right */
+  left: calc(50% + 250px); 
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
-  background-position: right top;
+  background-position: center top;
 }
 
 /* --- FORCE TRANSPARENCY ON ALL LAYERS --- */
