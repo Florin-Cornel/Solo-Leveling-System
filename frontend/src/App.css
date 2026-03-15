@@ -41,43 +41,50 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch Final Scaling --- */
+/* --- Shadow Monarch Final Scaling & Layering --- */
 .anime-bg-left, 
 .anime-bg-right {
   position: fixed !important;
-  /* Nudges them down so heads/swords don't hit the top bar */
-  top: 80px !important; 
+  /* Lowered to 100px to clear the top bar completely */
+  top: 100px !important; 
   bottom: 0 !important;
-  /* Scaled down from 45vw to 38vw to prevent crowding the center */
-  width: 38vw !important; 
-  z-index: -1 !important;
+  width: 35vw !important; /* Slightly smaller to prevent overlap */
+  /* Z-INDEX 1: Sits right above the black but behind all text */
+  z-index: 1 !important; 
   pointer-events: none !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   opacity: 0.9 !important;
   filter: brightness(1.1) contrast(1.1) saturate(1.3) !important;
   display: block !important;
-  transition: all 0.4s ease;
+  
 }
 
 .anime-bg-left {
-  /* Added a 2% gap from the left edge */
-  left: 2% !important;
+  left: 1% !important;
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png") !important;
   background-position: left top !important;
 }
 
 .anime-bg-right {
-  /* Added a 2% gap from the right edge */
-  right: 2% !important;
+  right: 1% !important;
   background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png") !important;
   background-position: right top !important;
 }
 
-/* Transparency tweak to ensure center readability */
-div.min-h-screen.bg-\[\#131314\] {
-  background-color: rgba(19, 19, 20, 0.65) !important;
-  backdrop-filter: blur(8px);
+/* THE CRITICAL FIX: Ensures the main background doesn't cover the shadows */
+.App, #root, [className*="bg-[#131314]"] {
+  background-color: transparent !important;
+}
+
+body {
+  background-color: #131314 !important; /* Move the black color to the absolute bottom layer */
+}
+
+/* Keeps your content readable and on top */
+main, .max-w-7xl, .header-container {
+  position: relative !important;
+  z-index: 10 !important;
 }
 /* --- Header Button Transformation --- */
 /* This targets the AddMission button once moved into the flex container */
