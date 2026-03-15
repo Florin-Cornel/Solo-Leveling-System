@@ -41,36 +41,40 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch Absolute Positioning --- */
+/* --- Shadow Monarch: Split-Screen Center Alignment --- */
 body::before,
 body::after {
   content: "";
   position: fixed;
   top: 100px;
   bottom: 0;
-  width: 32vw; /* Slightly narrower to prevent overlap */
+  /* We give each character exactly HALF the screen */
+  width: 50vw !important; 
   z-index: -1;
   pointer-events: none;
-  background-size: contain;
-  background-repeat: no-repeat;
-  opacity: 0.85;
-  filter: brightness(1.1) contrast(1.1) saturate(1.3);
+  /* We force a specific size so it stops fighting the container limits */
+  background-size: 30vw auto !important; 
+  background-repeat: no-repeat !important;
+  opacity: 0.85 !important;
+  filter: brightness(1.1) contrast(1.1) saturate(1.3) !important;
 }
 
-/* Jin-Woo - Moving inward from the left */
+/* Jin-Woo (Left Half) */
 body::before {
-  /* 0vw is the far left. 15vw pushes him significantly toward the middle. */
-  left: 15vw !important; 
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
-  background-position: left top;
+  left: 0 !important;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png") !important;
+  /* 100% touches the center line. 85% pulls him back slightly so he doesn't overlap text. */
+  /* INCREASE this number (e.g., to 95%) to move him closer to center */
+  background-position: 85% top !important; 
 }
 
-/* Igris - Moving inward from the right */
+/* Igris (Right Half) */
 body::after {
-  /* 0vw is the far right. 15vw pushes him significantly toward the middle. */
-  right: 15vw !important; 
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
-  background-position: right top;
+  right: 0 !important;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png") !important;
+  /* 0% touches the center line. 15% pushes him back slightly. */
+  /* DECREASE this number (e.g., to 5%) to move him closer to center */
+  background-position: 15% top !important; 
 }
 
 /* --- FORCE TRANSPARENCY ON ALL LAYERS --- */
