@@ -41,7 +41,12 @@ html {
   z-index: 10;
 }
 
-/* --- Shadow Monarch Force Manifestation --- */
+/* --- Shadow Manifestation: Transparency Fix --- */
+div.min-h-screen.bg-\[\#131314\] {
+  background-color: rgba(19, 19, 20, 0.7) !important; /* Makes the black 70% transparent */
+  backdrop-filter: blur(4px); /* Adds a cool frost effect */
+}
+
 .anime-bg-left, 
 .anime-bg-right {
   position: fixed !important;
@@ -49,32 +54,17 @@ html {
   bottom: 0 !important;
   height: 100vh !important;
   width: 45vw !important; 
-  /* Z-INDEX 5: Pushes them in front of the black background */
-  z-index: 5 !important;  
+  z-index: -1 !important; /* Move them BEHIND the transparent wall */
   pointer-events: none !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
-  opacity: 0.9 !important;
-  filter: brightness(1.2) contrast(1.1) saturate(1.4) !important;
+  opacity: 1 !important; /* Full power */
   display: block !important;
 }
 
-.anime-bg-left {
-  left: 0 !important;
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png") !important;
-  background-position: left center !important;
-}
-
-.anime-bg-right {
-  right: 0 !important;
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png") !important;
-  background-position: right center !important;
-}
-
-/* IMPORTANT: This forces your missions to stay on top of the characters */
-main, .max-w-7xl, section, .header-container, nav {
-  position: relative !important;
-  z-index: 10 !important; /* Higher than the characters */
+/* Ensure the absolute back of the page is still black */
+body {
+  background-color: #000 !important;
 }
 
 /* --- Header Button Transformation --- */
