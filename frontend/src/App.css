@@ -48,14 +48,15 @@ html {
   top: 0 !important;
   bottom: 0 !important;
   height: 100vh !important;
-  width: 45vw !important; /* Uses viewport width to ensure size */
-  z-index: 1 !important;  /* Changed to 1 to sit right above the dark base */
+  width: 45vw !important; 
+  /* Z-INDEX 5: Pushes them in front of the black background */
+  z-index: 5 !important;  
   pointer-events: none !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   opacity: 0.9 !important;
   filter: brightness(1.2) contrast(1.1) saturate(1.4) !important;
-  display: block !important; /* Forces visibility */
+  display: block !important;
 }
 
 .anime-bg-left {
@@ -70,15 +71,10 @@ html {
   background-position: right center !important;
 }
 
-/* Ensure the main app background doesn't swallow the characters */
-.App, #root, body {
-  background-color: #131314 !important;
-}
-
-/* Forces your content to sit in the very front */
-main, .max-w-7xl, section {
+/* IMPORTANT: This forces your missions to stay on top of the characters */
+main, .max-w-7xl, section, .header-container, nav {
   position: relative !important;
-  z-index: 10 !important;
+  z-index: 10 !important; /* Higher than the characters */
 }
 
 /* --- Header Button Transformation --- */
