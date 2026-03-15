@@ -16,17 +16,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Find and Build
+      - name: Sniper Build
         run: |
-          # Find the package.json that belongs to your site
-          TARGET_DIR=$(find . -maxdepth 2 -name "package.json" -exec grep -l "dependencies" {} + | head -n 1 | xargs dirname)
-          echo "Targeting directory: $TARGET_DIR"
-          cd "$TARGET_DIR"
+          echo "Bypassing decoy, targeting frontend directly..."
+          cd frontend
           npm install --legacy-peer-deps
           npm install ajv@^8 --legacy-peer-deps
-          # BYPASS STRICT MODE WARNINGS
           CI=false npm run build
-          # Ensure the output is moved to a known location
+          # Move output safely
           mkdir -p $GITHUB_WORKSPACE/deploy_ready
           cp -r dist/* $GITHUB_WORKSPACE/deploy_ready/ || cp -r build/* $GITHUB_WORKSPACE/deploy_ready/ || true
       - name: Setup Pages
