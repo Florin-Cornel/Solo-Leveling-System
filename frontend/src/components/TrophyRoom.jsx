@@ -20,6 +20,14 @@ const ELDEN_LORD = {
   type: 'runes',
 };
 
+// PASTE STARTING HERE:
+const SECRET_ACHIEVEMENTS = [
+  { id: 'first-awakening', name: 'First Awakening', description: 'Complete your first mission', threshold: 1, type: 'missions' },
+  { id: 'iron-will', name: 'The Iron Will', description: 'Complete 50 missions', threshold: 50, type: 'missions' },
+  { id: 'rune-hoarder', name: 'Rune Hoarder', description: 'Accumulate 1,000 Lifetime Runes', threshold: 1000, type: 'runes' },
+  { id: 'shadow-general', name: 'Shadow General', description: 'Reach Level 10', threshold: 10, type: 'level' }
+];
+
 const TrophyRoom = ({ lifetimeMissions, lifetimeRunes }) => {
   // Get current hunter rank
   const getCurrentRank = () => {
@@ -311,7 +319,28 @@ const TrophyRoom = ({ lifetimeMissions, lifetimeRunes }) => {
       </div>
     </div>
   );
+{/* New Secret Achievements Grid */}
+      <div className="mt-8">
+        <h3 className="font-heading text-lg font-bold text-zinc-300 mb-4 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-purple-400" />
+          Secret Achievements
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {SECRET_ACHIEVEMENTS.map((ach) => {
+            const unlocked = ach.type === 'missions' ? lifetimeMissions >= ach.threshold : 
+                             ach.type === 'runes' ? lifetimeRunes >= ach.threshold : false;
+            return (
+              <div key={ach.id} className={`p-4 rounded-xl border-2 transition-all ${unlocked ? 'border-purple-500/50 bg-purple-500/10' : 'border-zinc-800 bg-zinc-900/50 opacity-60'}`}>
+                <div className="flex justify-between items-center">
+                   <h4 className={`font-bold ${unlocked ? 'text-purple-400' : 'text-zinc-500'}`}>{ach.name}</h4>
+                   {unlocked ? <CheckCircle className="w-4 h-4 text-purple-400" /> : <Lock className="w-4 h-4 text-zinc-700" />}
+                </div>
+                <p className="text-xs text-zinc-400">{ach.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 };
-
 export { HUNTER_RANKS };
 export default TrophyRoom;

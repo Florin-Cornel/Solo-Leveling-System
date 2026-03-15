@@ -171,17 +171,19 @@ function App() {
     });
   }, [dateKey, currentDate, setMissions]);
 
-  // Toggle mission completion
+  // Toggle mission completion (Truth Reflection Patch)
   const handleToggleMission = useCallback((missionId) => {
     const mission = missions.find((m) => m.id === missionId);
     if (!mission) return;
 
     const wasCompleted = currentDayCompletions[missionId];
+    
+    // Calculate rewards based on current buff state
     let runeValue = RUNE_REWARDS[mission.rank] || 10;
     let xpValue = XP_REWARDS[mission.rank] || 50;
 
     // Apply shadow buff multiplier (1.5x) if active and this isn't an A/S rank mission
-    if (hasShadowBuff && !wasCompleted && mission.rank !== 'A' && mission.rank !== 'S') {
+    if (hasShadowBuff && mission.rank !== 'A' && mission.rank !== 'S') {
       runeValue = Math.floor(runeValue * 1.5);
       xpValue = Math.floor(xpValue * 1.5);
     }
@@ -195,15 +197,15 @@ function App() {
     }));
 
     if (!wasCompleted) {
-      // Completing the mission
+      // --- COMPLETING THE MISSION ---
       const newLifetimeMissions = lifetimeMissions + 1;
       const newTotalXP = totalXP + xpValue;
       const newLevel = getLevelFromXP(newTotalXP);
       
       setTotalRunes((prev) => prev + runeValue);
       setLifetimeRunes((prev) => prev + runeValue);
-      setLifetimeMissions((prev) => prev + 1);
-      setTotalXP((prev) => prev + xpValue);
+      setLifetimeMissions(newLifetimeMissions);
+      setTotalXP(newTotalXP);
       
       // Check for level up
       if (newLevel > currentLevel) {
@@ -221,7 +223,6 @@ function App() {
         [mission.rank]: (prev[mission.rank] || 0) + 1,
       }));
       
-      // Play sounds
       playRuneSound(mission.rank);
       playLevelUpSound();
       
@@ -258,14 +259,22 @@ function App() {
         description: `${mission.rank}-Rank mission completed`,
       });
     } else {
-      // Uncompleting the mission
-      const baseRuneValue = RUNE_REWARDS[mission.rank] || 10;
-      const baseXPValue = XP_REWARDS[mission.rank] || 50;
-      setTotalRunes((prev) => Math.max(0, prev - baseRuneValue));
-      setTotalXP((prev) => Math.max(0, prev - baseXPValue));
+      // --- UNCOMPLETING THE MISSION (THE PENALTY) ---
+      // We subtract the SAME values we added, ensuring the stats reflect the truth
+      setTotalRunes((prev) => Math.max(0, prev - runeValue));
+      setLifetimeRunes((prev) => Math.max(0, prev - runeValue));
+      setLifetimeMissions((prev) => Math.max(0, prev - 1));
+      setTotalXP((prev) => Math.max(0, prev - xpValue));
+      
+      // Remove from rank counts
+      setMissionCounts((prev) => ({
+        ...prev,
+        [mission.rank]: Math.max(0, (prev[mission.rank] || 0) - 1),
+      }));
+
       playUncheckSound();
-      toast.info(`-${baseXPValue} XP | -${baseRuneValue} Runes`, {
-        description: 'Mission marked incomplete',
+      toast.info(`-${xpValue} XP | -${runeValue} Runes`, {
+        description: 'Mission marked incomplete - rewards revoked.',
       });
     }
   }, [missions, currentDayCompletions, dateKey, hasShadowBuff, shadowBuffData, lifetimeMissions, 
