@@ -148,13 +148,13 @@ select,
 
 .anime-bg-left {
   left: -2%; 
-  background-image: url('/jinwoo-bg.png'); /* Removed ./assets/ */
+  background-image: url("/jinwoo-bg.png"); /* Notice the double quotes " " */
   background-position: left center;
 }
 
 .anime-bg-right {
   right: -2%; 
-  background-image: url('/igris-bg.png'); /* Removed ./assets/ */
+  background-image: url("/igris-bg.png"); /* Notice the double quotes " " */
   background-position: right center;
 }
 
