@@ -41,37 +41,44 @@ html {
   z-index: 10;
 }
 
-/* --- Final Shadow Monarch Backgrounds --- */
-.anime-bg-left, .anime-bg-right {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  height: 100vh;
-  width: 50%; /* Maximized size */
-  z-index: 1; /* Moves them in front of the black background */
-  pointer-events: none;
-  background-size: contain;
-  background-repeat: no-repeat;
-  opacity: 0.9;
-  filter: brightness(1.2) contrast(1.1) saturate(1.4);
+/* --- Shadow Monarch Force Manifestation --- */
+.anime-bg-left, 
+.anime-bg-right {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  width: 45vw !important; /* Uses viewport width to ensure size */
+  z-index: 1 !important;  /* Changed to 1 to sit right above the dark base */
+  pointer-events: none !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  opacity: 0.9 !important;
+  filter: brightness(1.2) contrast(1.1) saturate(1.4) !important;
+  display: block !important; /* Forces visibility */
 }
 
 .anime-bg-left {
-  left: 0;
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png");
-  background-position: left center;
+  left: 0 !important;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/jinwoo-bg.png") !important;
+  background-position: left center !important;
 }
 
 .anime-bg-right {
-  right: 0;
-  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png");
-  background-position: right center;
+  right: 0 !important;
+  background-image: url("https://raw.githubusercontent.com/Florin-Cornel/Solo-Leveling-System/main/frontend/public/igris-bg.png") !important;
+  background-position: right center !important;
 }
 
-/* This ensures your missions and level bar stay ON TOP of the characters */
-main, .relative.z-10, .max-w-7xl {
-  position: relative;
-  z-index: 10 !important; 
+/* Ensure the main app background doesn't swallow the characters */
+.App, #root, body {
+  background-color: #131314 !important;
+}
+
+/* Forces your content to sit in the very front */
+main, .max-w-7xl, section {
+  position: relative !important;
+  z-index: 10 !important;
 }
 
 /* --- Header Button Transformation --- */
