@@ -176,3 +176,24 @@ select,
     width: 30%;
   }
 }
+/* --- Header Button Transformation --- */
+.flex.justify-center.mb-6 .fixed.bottom-8.right-8 {
+  position: static !important;
+  width: 240px !important;
+  height: 48px !important;
+  border-radius: 12px !important;
+  background: rgba(34, 211, 238, 0.1) !important;
+  border: 1px solid rgba(34, 211, 238, 0.4) !important;
+  color: #22D3EE !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.1) !important;
+}
+
+.flex.justify-center.mb-6 .fixed.bottom-8.right-8::after {
+  content: "NEW MISSION";
+  font-size: 14px;
+}

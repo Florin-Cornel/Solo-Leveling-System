@@ -581,7 +581,9 @@ function App() {
               <h2 className="font-heading text-xl font-bold text-zinc-300 tracking-wide">
                 Mission Log
               </h2>
-              
+              <div className="flex justify-center mb-6">
+  <AddMissionModal onAddMission={handleAddMission} />
+</div>
               {missionsWithStatus.length === 0 ? (
                 <div className="text-center py-12 text-zinc-500 bg-[#1a1a1b] rounded-xl border border-zinc-800" data-testid="empty-missions">
                   <p className="text-lg mb-2">No missions for this day</p>
@@ -603,7 +605,7 @@ function App() {
             </section>
 
             {/* Add Mission Button */}
-            <AddMissionModal onAddMission={handleAddMission} />
+
           </div>
         )}
 
