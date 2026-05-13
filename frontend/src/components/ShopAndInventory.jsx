@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Package } from 'lucide-react';
+import { ShoppingBag, Package, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { SHOP_ITEMS, SHOP_CATEGORIES } from '../config/gameConfig';
+import { ITEM_EFFECTS, hasEffect } from '../config/itemEffects';
 import EldenRune from './EldenRune';
 import { toast } from 'sonner';
 
-const ShopAndInventory = ({ totalRunes, inventory, onPurchase }) => {
+const ShopAndInventory = ({ totalRunes, inventory, onPurchase, onUseItem }) => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [showInventory, setShowInventory] = useState(false);
 
@@ -136,6 +137,25 @@ const ShopAndInventory = ({ totalRunes, inventory, onPurchase }) => {
                         <Icon className="w-6 h-6" style={{ color: color }} />
                       </div>
                       <span className="text-white font-medium text-sm">{item.name}</span>
+
+                      {/* Use button — only shown for items with effects */}
+                      {hasEffect(id) && (
+                        <>
+                          <p className="text-[10px] text-zinc-500 leading-tight px-1 line-clamp-2">
+                            {ITEM_EFFECTS[id].description}
+                          </p>
+                          <Button
+                            size="sm"
+                            onClick={() => onUseItem?.(id)}
+                            className="w-full text-xs font-bold mt-1"
+                            style={{ backgroundColor: color, color: '#000' }}
+                            data-testid={`use-item-${id}`}
+                          >
+                            <Sparkles className="w-3 h-3 mr-1" />
+                            {ITEM_EFFECTS[id].label}
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );

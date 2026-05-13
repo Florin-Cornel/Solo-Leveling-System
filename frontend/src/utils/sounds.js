@@ -125,4 +125,67 @@ export const playLevelUpSound = () => {
   }
 };
 
-export default { playRuneSound, playUncheckSound, playDeleteSound, playLevelUpSound };
+// Level Up Fanfare — bigger, layered, plays on the LevelUpAnimation overlay.
+// Self-contained, no CDN. Avoids the previous Pixabay 403 issue.
+export const playLevelUpFanfare = () => {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+
+    // Layer 1: Ascending power chord (C major triad sweeping up two octaves)
+    const chordNotes = [
+      [261.63, 329.63, 392.0],   // C4, E4, G4
+      [392.0,  493.88, 587.33],  // G4, B4, D5
+      [523.25, 659.25, 783.99],  // C5, E5, G5
+      [1046.5, 1318.5, 1567.98], // C6, E6, G6
+    ];
+
+    chordNotes.forEach((chord, idx) => {
+      const t0 = now + idx * 0.15;
+      chord.forEach((freq) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = idx === chordNotes.length - 1 ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        gain.gain.setValueAtTime(0, t0);
+        gain.gain.linearRampToValueAtTime(0.12, t0 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + 0.55);
+      });
+    });
+
+    // Layer 2: Low impact "boom" on the first chord
+    const boom = ctx.createOscillator();
+    const boomGain = ctx.createGain();
+    boom.type = 'sine';
+    boom.frequency.setValueAtTime(80, now);
+    boom.frequency.exponentialRampToValueAtTime(40, now + 0.4);
+    boomGain.gain.setValueAtTime(0.25, now);
+    boomGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    boom.connect(boomGain);
+    boomGain.connect(ctx.destination);
+    boom.start(now);
+    boom.stop(now + 0.65);
+
+    // Layer 3: Final shimmering high octave on the last chord
+    const shimmer = ctx.createOscillator();
+    const shimmerGain = ctx.createGain();
+    shimmer.type = 'triangle';
+    shimmer.frequency.setValueAtTime(2093.0, now + 0.6); // C7
+    shimmerGain.gain.setValueAtTime(0, now + 0.6);
+    shimmerGain.gain.linearRampToValueAtTime(0.08, now + 0.65);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+    shimmer.connect(shimmerGain);
+    shimmerGain.connect(ctx.destination);
+    shimmer.start(now + 0.6);
+    shimmer.stop(now + 1.25);
+  } catch (e) {
+    console.log('Level-up fanfare not supported');
+  }
+};
+
+export default { playRuneSound, playUncheckSound, playDeleteSound, playLevelUpSound, playLevelUpFanfare };
+

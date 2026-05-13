@@ -29,7 +29,7 @@ export function useLocalStorage(key, initialValue) {
     });
   }, []);
 
-  // Listen for storage changes from other tabs
+  // Listen for storage changes from other tabs AND for our cloud-pulled event
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === key && e.newValue !== null) {
@@ -41,9 +41,18 @@ export function useLocalStorage(key, initialValue) {
       }
     };
 
+    const handleCloudPulled = () => {
+      // Refresh from localStorage after a cloud sync overwrote it.
+      setStoredValue(getStorageValue(key, initialValue));
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [key]);
+    window.addEventListener('epic-grind-cloud-pulled', handleCloudPulled);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('epic-grind-cloud-pulled', handleCloudPulled);
+    };
+  }, [key, initialValue]);
 
   return [storedValue, setValue];
 }

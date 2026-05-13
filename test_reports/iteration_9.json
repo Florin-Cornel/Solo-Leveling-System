@@ -1,0 +1,52 @@
+{
+  "summary": "Frontend-only testing of Solo Leveling System v7 (Supabase sync stub + Item Effects + custom hooks refactor + Web Audio fanfare). 14 of 16 required flows PASS. 2 critical issues found: (1) Pixabay CDN audio (audio_783d1a013f.mp3) still fetched and returns 403 from RankUpAnimation.jsx and HunterRankUpModal.jsx — playLevelUpFanfare replacement was applied to LevelUpAnimation.jsx only. (2) During in-session shop purchase flow, after toggling to inventory the use-item-* buttons did not render even though 4 items were in localStorage; however when inventory is pre-seeded and the page reloaded, all use buttons appear correctly. Pre-seeded scenario verified: ♥1 charge pill, Use Crystal, Invoke Blessing all work end-to-end.",
+  "backend_issues": {},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ShopAndInventory (in-session)", "issue": "After purchasing items via UI clicks and toggling to inventory view, the use-item-* buttons do not appear. The inventory state writes to localStorage (verified 4 items) but the component appears to render the previous (empty) state. Pre-seeded localStorage + reload renders correctly.", "selector": "[data-testid=\"use-item-health_potion\"]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Level-up / Hunter Rank-up audio", "issue": "Pixabay CDN MP3 (audio_783d1a013f.mp3) is STILL being fetched and returns 403. 4 requests captured during session. The Web Audio replacement was applied to LevelUpAnimation.jsx ONLY — RankUpAnimation.jsx (line 4) and HunterRankUpModal.jsx (line 12) still reference the same CDN URL.", "affected_selectors": ["RankUpAnimation", "HunterRankUpModal"]}
+    ],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "App loads at REACT_APP_BACKEND_URL with zero page errors",
+    "sync-indicator-btn renders with label 'Offline' (Supabase env empty)",
+    "Click sync-indicator-btn opens system-login-modal; amber 'Cloud not configured' visible; system-key-input present; system-login-btn DISABLED because env empty; system-login-close closes modal",
+    "Nav has exactly 4 tabs: missions, status, shop, trophies. nav-tab-inventory count = 0 ✓",
+    "D-rank mission create + complete awards +100 XP / +40 Runes (visible in UI as 'Runes: 40' and 'Level 2 (0/282 XP)')",
+    "Shop view renders 10 items in shop-grid; buy-health_potion (100), buy-mana_crystal (150), buy-monarchs_blessing (2500) all deduct runes correctly (5000 → 2000 after 3 purchases)",
+    "toggle-inventory-btn switches between Shop and Inventory views",
+    "Inventory (pre-seeded) renders 4 inventory-item-* tiles for health_potion, mana_crystal, monarchs_blessing, shadow_essence",
+    "Item effect gating works: shadow_essence has NO use button (use-item-shadow_essence count = 0); other 3 items DO have use buttons (Use Potion / Use Crystal / Invoke Blessing)",
+    "use-item-health_potion click → health-potion-charges pill renders in header showing '♥ 1' and toast 'Health Potion consumed' appears",
+    "Status page renders 5 attribute-* tiles (strength, agility, vitality, intelligence, perception)",
+    "LocalStorage persistence: inventory, runes, monarch-until, health-potion-charges all survive page reload (verified via localStorage read pre/post reload)",
+    "Custom hooks integrate: useWallet (Runes display), useLeveling (Level/XP bar), useMissions (CRUD + toggle), useInventory (purchase + use), useSync (status pill) — no crashes",
+    "Supabase env empty graceful degradation: app renders 100% functionally; supabase client is null but no crashes; system-login-btn correctly disabled"
+  ],
+  "failed_tests": [
+    "Audio: completing missions / rank-ups STILL fetches Pixabay CDN '/audio_783d1a013f.mp3' and gets 403 — 4 such requests captured. Bug NOT fully fixed.",
+    "In-session shop → inventory → Use flow: after purchase via UI clicks, use-item-* buttons absent on first toggle. Cannot reliably verify monarch '(2x Monarch)' multiplier on D-rank without working in-session use button. (Workaround: pre-seed via localStorage works.)"
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "PRIORITY HIGH: Replace remaining Pixabay CDN audio URL in /app/frontend/src/components/RankUpAnimation.jsx (line 4) and /app/frontend/src/components/HunterRankUpModal.jsx (line 12) with playLevelUpFanfare() (or similar Web Audio API call from utils/sounds.js). Currently only LevelUpAnimation.jsx was updated.",
+    "PRIORITY MEDIUM: Investigate why ShopAndInventory does not re-render inventory-grid with new use buttons after purchasing items in the SAME session (no reload). Likely a state-sync issue between useInventory hook write and ShopAndInventory prop. Pre-seeded + reload works correctly — only the in-session click flow is affected. Suggest verifying that `inventory` prop is the latest state object reference after setInventory completes (possibly need to verify useLocalStorage setter triggers re-render synchronously)."
+  ],
+  "critical_code_review_comments": [
+    "Two duplicate Pixabay CDN audio URLs remain in RankUpAnimation.jsx and HunterRankUpModal.jsx after partial refactor — extract a single playRankUpSound() into utils/sounds.js (Web Audio) and replace both.",
+    "useInventory.useItem uses setTimeout(..., 0) to defer effect — this works for current cases but is a fragile pattern. The mana_crystal effect reads availablePoints from closure which can be stale; passing levelingApi keeps it functional, but consider using functional setState (setAvailablePoints(prev => prev + 1)) to avoid stale-closure bugs.",
+    "App.js auto-sync useEffect has a very large dependency array (14+ states) and uses eslint-disable — every state mutation triggers triggerSync. Acceptable since sync is debounced, but worth documenting.",
+    "ShopAndInventory.jsx is ~270 lines and mixes both shop and inventory rendering — should be split into <Shop /> and <Inventory /> components for cleaner separation now that inventory has its own behavior (use buttons)."
+  ],
+  "updated_files": [],
+  "success_rate": {"frontend": "87.5% (14/16)"},
+  "test_credentials": "N/A — Supabase env intentionally empty; offline-only mode tested",
+  "seed_data_creation": "Test 2/3: pre-seeded localStorage with epic-grind-inventory containing 4 items (health_potion, mana_crystal, monarchs_blessing, shadow_essence) and epic-grind-total-runes=5000 to validate inventory render + use-button gating",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Key localStorage keys: epic-grind-total-runes, epic-grind-runes (duplicate?), epic-grind-total-xp, epic-grind-current-level, epic-grind-available-points, epic-grind-inventory, epic-grind-health-potion-charges, epic-grind-monarch-until, epic-grind-system-key. Two rune keys exist (epic-grind-runes AND epic-grind-total-runes) — verify which is canonical. Sync indicator label is 'Offline' (not 'Local'). System-login-btn IS disabled when Supabase env empty. After fixing the audio CDN bug in RankUpAnimation.jsx + HunterRankUpModal.jsx, retest: complete a mission to 100% (triggers RankUpAnimation) and reach a hunter-rank threshold — verify NO pixabay requests in Network tab. Also retest the in-session purchase → toggle → use flow once the inventory re-render issue is investigated.",
+  "rca of the issue": "Pixabay audio 403: The refactor commit only replaced the audio call inside LevelUpAnimation.jsx but missed two sibling components RankUpAnimation.jsx (line 4: const RANK_UP_SOUND = 'https://cdn.pixabay.com/audio/2022/03/15/audio_783d1a013f.mp3') and HunterRankUpModal.jsx (line 12: new Audio('https://cdn.pixabay.com/...')) which still trigger HTTP requests to the CDN. Mitigation: replace both with playLevelUpFanfare() (or a new playRankUpFanfare) from utils/sounds.js using the existing Web Audio API context."
+}
