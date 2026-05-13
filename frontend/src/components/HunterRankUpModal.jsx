@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Crown, Zap } from 'lucide-react';
+import { playLevelUpFanfare } from '../utils/sounds';
 
 const HunterRankUpModal = ({ show, rankData, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -7,18 +8,16 @@ const HunterRankUpModal = ({ show, rankData, onClose }) => {
   useEffect(() => {
     if (show && rankData) {
       setIsVisible(true);
-      
-      // Play rank up sound
-      const audio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_783d1a013f.mp3');
-      audio.volume = 0.6;
-      audio.play().catch(e => console.log('Audio play failed:', e));
-      
+
+      // Self-hosted Web Audio fanfare (no CDN)
+      playLevelUpFanfare();
+
       // Auto close after 4 seconds
       const timer = setTimeout(() => {
         setIsVisible(false);
         onClose?.();
       }, 4000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [show, rankData, onClose]);

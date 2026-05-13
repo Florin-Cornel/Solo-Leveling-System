@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Zap } from 'lucide-react';
-
-const RANK_UP_SOUND = 'https://cdn.pixabay.com/audio/2022/03/15/audio_783d1a013f.mp3';
+import { playLevelUpFanfare } from '../utils/sounds';
 
 const RankUpAnimation = ({ show, onComplete }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -9,18 +8,16 @@ const RankUpAnimation = ({ show, onComplete }) => {
   useEffect(() => {
     if (show) {
       setIsVisible(true);
-      
-      // Play the chime sound
-      const audio = new Audio(RANK_UP_SOUND);
-      audio.volume = 0.5;
-      audio.play().catch(e => console.log('Audio play failed:', e));
-      
+
+      // Self-hosted Web Audio fanfare (no CDN)
+      playLevelUpFanfare();
+
       // Hide after 3 seconds
       const timer = setTimeout(() => {
         setIsVisible(false);
         onComplete?.();
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [show, onComplete]);

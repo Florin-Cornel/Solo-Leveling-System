@@ -1,0 +1,52 @@
+{
+  "summary": "Solo Leveling v7 RETEST after audio CDN fix and in-session inventory bug. AUDIO CDN FIX = CONFIRMED PASS (0 Pixabay requests across full session including RankUpAnimation trigger). IN-SESSION INVENTORY BUG = STILL FAILING. RCA refined: toggle-inventory-btn click DOES NOT flip showInventory state after purchases — toggle button text remains 'View Inventory (3)' (still in shop view) instead of 'View Shop' (inventory view). Reload makes everything render correctly. 6/8 retest items PASS.",
+  "backend_issues": {},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "ShopAndInventory",
+        "issue": "After 3 in-session purchases via UI, clicking [data-testid=\"toggle-inventory-btn\"] does NOT flip the local showInventory state. The button's label remains 'View Inventory (3)' AFTER click (should change to 'View Shop'). Neither inventory-grid nor the 'inventory is empty' message renders. The toggle works fine BEFORE purchases and ALWAYS works after a page reload. Repeated toggle clicks (3+) still do not switch view. Conclusion: this is NOT a stale-prop bug as iter-9 hypothesized — it's that the toggle button click handler is no-op'd or the component is re-mounting and resetting showInventory to false right after each click. Likely cause: ShopAndInventory is being unmounted/remounted on every parent (App) re-render triggered by inventory state change, resetting its internal useState(false). The parent App has a 14-state useEffect that triggers triggerSync on every state mutation — this re-render cascade may be remounting the child via changing key or conditional.",
+        "selector": "[data-testid=\"toggle-inventory-btn\"]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Page loads at REACT_APP_BACKEND_URL, sync-indicator-btn shows 'Offline', exactly 4 nav tabs (no inventory tab)",
+    "AUDIO CDN: 0 Pixabay requests across full 60s+ session including RankUpAnimation trigger (100% completion). RankUpAnimation overlay visible with data-testid=rank-up-animation, Web Audio fanfare path executed, no CDN fetch",
+    "Shop renders 10 items; buy-health_potion (100), buy-mana_crystal (150), buy-monarchs_blessing (2500) all deduct runes from epic-grind-runes correctly (5000→2250)",
+    "Inventory persistence: localStorage epic-grind-inventory contains 3 items {health_potion, mana_crystal, monarchs_blessing} immediately after purchases",
+    "After page reload: inventory-grid renders 3 tiles, 3 use-item-* buttons (use-item-health_potion, use-item-mana_crystal, use-item-monarchs_blessing). shadow_essence is correctly gated out (no use button when present)",
+    "D-rank mission create + complete awards +100 XP base (verified via localStorage epic-grind-total-xp delta)",
+    "RankUpAnimation overlay fires when 100% missions completed (data-testid=rank-up-animation visible)",
+    "Canonical runes key confirmed: epic-grind-runes (not epic-grind-total-runes which stayed stale at 5000). Wallet display uses epic-grind-runes."
+  ],
+  "failed_tests": [
+    "IN-SESSION purchase→toggle-inventory→use flow: toggle-inventory-btn click is a no-op after purchases (button label remains 'View Inventory (3)'). use-item-* buttons never render in-session. Could NOT test Use Potion / Use Crystal / Invoke Blessing in same session.",
+    "Monarch multiplier (2x XP/Runes) on D-rank: could NOT verify because Monarch's Blessing could not be activated in-session due to toggle bug. XP gain on D-rank stayed at base 100 (Monarch was never active).",
+    "HunterRankUpModal trigger: seeded epic-grind-lifetime-missions=24 and completed 1 more mission, but [data-testid=hunter-rank-up-modal] did NOT appear. Only rank-up-animation appeared. Likely the lifetime-missions counter logic does not read the seeded value or the threshold rank logic requires a different key. Needs main-agent verification of trigger condition."
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "PRIORITY HIGH (REGRESSION FROM ITER-9): The in-session toggle-inventory-btn click no longer flips view after purchases. Hypothesis: ShopAndInventory is being remounted (showInventory useState resets to false) on every App re-render. Likely cause is the large auto-sync useEffect in App.js firing setTriggerSync/setSyncStatus on inventory.inventory dependency, which re-renders parent. Fix options: (a) Move showInventory state up to App or use useLocalStorage so it persists across remounts; (b) Investigate why component unmounts — possibly conditional key change or React.memo issue; (c) Use useRef for showInventory or move toggle to global state.",
+    "PRIORITY MEDIUM: HunterRankUpModal did NOT fire after seeding epic-grind-lifetime-missions=24 + completing 1 mission. Verify (a) the correct localStorage key for lifetime mission counter, (b) the rank threshold logic, (c) whether the modal needs additional state to fire (current rank tracking key).",
+    "PRIORITY LOW: Audio fix is CONFIRMED — both RankUpAnimation.jsx and HunterRankUpModal.jsx now correctly call playLevelUpFanfare() with no CDN. No further audio action needed."
+  ],
+  "critical_code_review_comments": [
+    "ShopAndInventory.jsx line 11: useState(false) for showInventory is fragile — any parent remount resets it. With 3 purchases triggering 3 parent re-renders via the auto-sync useEffect, this state is likely being lost. Lift to App state or persist via useLocalStorage.",
+    "useInventory.js line 41: setTimeout(..., 0) defer pattern reads availablePoints from closure — confirmed stale-closure risk. Use functional setState in itemEffects: setAvailablePoints(prev => prev + 1).",
+    "App.js line 85-90: 14+ state dependency array on auto-sync useEffect with eslint-disable. Every inventory/wallet/leveling mutation triggers setSyncStatus which re-renders ShopAndInventory child and unmounts its internal state (showInventory). This is the smoking gun for the in-session toggle bug.",
+    "Two rune keys still co-exist: epic-grind-runes (canonical, used by wallet) and epic-grind-total-runes (legacy or unused). Recommend removing one to avoid confusion in tests and future bugs.",
+    "ShopAndInventory.jsx (273 lines) still mixes Shop and Inventory rendering — should split into <Shop /> and <Inventory /> for cleaner state separation and easier debugging of this exact bug."
+  ],
+  "updated_files": [],
+  "success_rate": {"frontend": "75% (6/8 retest items PASS — audio fix confirmed; in-session inventory regression persists)"},
+  "test_credentials": "N/A — Supabase env intentionally empty; offline-only mode tested",
+  "seed_data_creation": "Seeded epic-grind-runes=5000 + epic-grind-total-runes=5000 via localStorage to enable 3-item purchase test. Also seeded epic-grind-lifetime-missions=24 for HunterRankUp trigger attempt.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Audio CDN fix is FULLY VERIFIED — do not retest unless new code lands. Canonical runes localStorage key is 'epic-grind-runes' (wallet display reads this; iter-9 used 'epic-grind-total-runes' which is stale). The in-session toggle-inventory-btn bug now has a clearer RCA: toggle CLICK is no-op (button label confirms showInventory state did not flip). Test on fresh session: click toggle BEFORE any purchase — should work. Click toggle AFTER purchases — fails. Reload + toggle — works. HunterRankUpModal trigger condition needs main-agent clarification.",
+  "rca of the issue": "TOGGLE-INVENTORY-BTN IN-SESSION BUG RCA:\n1. ShopAndInventory.jsx maintains showInventory via useState(false) — local to the component instance.\n2. App.js has a large auto-sync useEffect (line ~80-90) whose dependency array includes inventory.inventory, wallet.totalRunes, leveling.* etc.\n3. Each handlePurchase mutates wallet.totalRunes AND inventory.inventory simultaneously → cascade of state changes → App re-renders.\n4. Because the auto-sync useEffect runs setSyncStatus(...), App re-renders again. If ShopAndInventory's React identity changes (different parent key, conditional rendering, or React-key prop), its useState resets to initial (false).\n5. Symptom observed: After 3 purchases, clicking toggle-inventory-btn does nothing — button text stays 'View Inventory (3)' (the not-toggled state) and inventory-grid never renders.\n6. Reload fixes it because on reload, the initial render of ShopAndInventory is standalone, the button click then toggles successfully (verified — RELOAD path shows 3 tiles + 3 use buttons).\n\nMITIGATION OPTIONS:\n(a) Lift showInventory to App state: const [showInventory, setShowInventory] = useState(false) in App.js, pass down as prop.\n(b) Persist via useLocalStorage('epic-grind-show-inventory', false) so it survives remounts.\n(c) Investigate why ShopAndInventory remounts — check the parent's conditional rendering of the shop tab. If using {activeTab === 'shop' && <ShopAndInventory ...>} with sync-induced re-render, the mount/unmount cycle resets useState. Memoize the tab content or use display:none toggle.\n\nRECOMMENDED FIX: option (a) — lift showInventory to App. Smallest code change, most testable."
+}
