@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 11 retest of HIGH-priority in-session toggle-inventory bug. The applied fix (useLocalStorage replacing useState for showInventory in ShopAndInventory.jsx) does NOT resolve the regression. Toggle works correctly with empty inventory (text and localStorage update correctly), but FAILS after any purchase — button text stays 'View Inventory (3)' and localStorage value persists as 'false' immediately after click. All downstream tests (use-item flows, monarch 2x multiplier, health potion penalty negation) could not be performed because they depend on getting to the inventory view to click use-item buttons. Audio CDN check passed (0 Pixabay/MP3 requests in the session). Smoke checks passed (4 nav tabs, Offline pill, runes balance shows in header, purchase deducts runes correctly).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "ShopAndInventory",
+        "issue": "REGRESSION NOT FIXED: After purchasing items, clicking toggle-inventory-btn is a no-op. Button text remains 'View Inventory (N)' instead of changing to 'View Shop'. localStorage key epic-grind-shop-view-inventory stays 'false' even after the click. Inventory grid never renders. Reproducible 100% of the time. Empty-inventory toggle works fine (localStorage→true, button label→'View Shop'), so the click handler IS firing — but something (likely a parent re-render or sync side-effect triggered by inventory change) resets the showInventory state back to false immediately after each click once inventory is non-empty. The useLocalStorage swap did NOT solve the underlying race condition.",
+        "selector": "[data-testid='toggle-inventory-btn']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Purchase → Toggle → Use Item",
+        "issue": "Blocked at step 2. Users cannot reach inventory to consume Health Potion, Mana Crystal, or Monarch's Blessing in-session. The only workaround is a full page reload (after which localStorage seed of epic-grind-shop-view-inventory='true' is respected on mount).",
+        "affected_selectors": ["[data-testid='toggle-inventory-btn']", "[data-testid='use-item-monarchs_blessing']", "[data-testid='use-item-mana_crystal']", "[data-testid='use-item-health_potion']"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Investigate why showInventory state resets to false after each toggle click ONLY when inventory is non-empty. Likely cause: a debounced sync or auto-write effect triggered by inventory mutation is overwriting epic-grind-shop-view-inventory back to its previous value, OR ShopAndInventory is being briefly unmounted/remounted when inventory prop reference changes, causing the lazy useState initializer in useLocalStorage to re-read the persisted-but-not-yet-flushed value.",
+    "Hypothesis to verify: Add a console.log inside ShopAndInventory render and inside the toggle onClick. If the component re-renders/re-mounts between click and persist, the state will reset. Possible fix paths: (1) memoize inventory prop reference in App.js so ShopAndInventory does not see new identity on every parent re-render; (2) move showInventory state up to App.js so it survives any ShopAndInventory remount; (3) write to localStorage SYNCHRONOUSLY inside the onClick handler (not via useEffect) so that even if component unmounts before useEffect commits, the value persists.",
+    "Once toggle is fixed, retest the full chain: monarch 2x XP/runes multiplier on D-rank mission, mana_crystal availablePoints+=1, health potion penalty negation with seeded yesterday completions, and shadow_essence having no use button."
+  ],
+  "critical_code_review_comments": [
+    "ShopAndInventory.jsx line 13: Using useLocalStorage for view-toggle state is a workaround, not a fix. The real issue is component-level re-mount or external state overwrite — neither is solved by persistence alone because the state is reset before useEffect flushes.",
+    "App.js line 451-458: ShopAndInventory is rendered with inventory={inventory.inventory}. If inventory.inventory returns a new array reference on every render (e.g., from .filter or .map in the hook), this can cause spurious child re-renders. Confirm useInventory returns stable references.",
+    "useLocalStorage.js line 33-55: The handleCloudPulled effect reads back from localStorage on the 'epic-grind-cloud-pulled' event. If that event fires between a setState and the useEffect that persists it, the state will be reset to whatever was last persisted. With Supabase not configured (REACT_APP_SUPABASE_URL empty), this event SHOULD never fire — but a unit assertion would help guard against regressions."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only test)", "frontend": "~25% (only smoke checks + audio + empty-inventory toggle pass; the critical regression scenario still fails)"},
+  "seed_data_creation": "Seeded localStorage with epic-grind-runes=5000 via JSON.stringify, then reloaded. Subsequent purchases deducted correctly (5000→2250 after Health Potion 100 + Mana Crystal 150 + Monarch's Blessing 2500 + ... wait recheck: 100+150+2500=2750, remaining 2250 ✓).",
+  "retest_needed": true,
+  "main_agent_can_self_test": false,
+  "context_for_next_testing_agent": "The toggle-inventory-btn no-op bug is reproducible 100% of the time AFTER any purchase. Steps to reproduce: (1) Clear localStorage, seed epic-grind-runes=JSON.stringify(5000), reload. (2) Click nav-tab-shop. (3) Verify toggle works while inventory is empty (click toggles to 'View Shop'; localStorage epic-grind-shop-view-inventory becomes 'true'). (4) Toggle back to shop. (5) Click buy-health_potion, buy-mana_crystal, buy-monarchs_blessing with 1500ms waits. (6) Click toggle-inventory-btn — button text stays 'View Inventory (3)' and localStorage stays 'false'. Use 2500ms wait after click. Direct localStorage seeding + reload DOES work to show inventory view, confirming render logic is fine; it's the state-update-during-session that fails. Audio fix confirmed working (0 Pixabay/MP3 requests).",
+  "rca of the issue": "Confirmed reproduction: localStorage value 'epic-grind-shop-view-inventory' = 'false' immediately after the toggle click when inventory has items, but = 'true' after the same click when inventory is empty. This proves the click handler fires (state IS being set to true), but is then reverted to false before the next render or before useEffect persists. Two plausible root causes — (a) ShopAndInventory is briefly unmounted+remounted on inventory mutation (e.g., due to a reconciliation key change or a conditional remount in App.js), causing useState's lazy init to re-read the not-yet-persisted localStorage value (=false); (b) useInventory's setInventory triggers a batched state update that, combined with React 18 automatic batching, causes the toggle's onClick state update and the inventory state update to be batched together, with the inventory update winning and dropping the toggle update — unlikely but possible if the click event is somehow re-firing. Recommended fix: hoist showInventory up to App.js OR write to localStorage synchronously inside the onClick handler (e.g., `localStorage.setItem('epic-grind-shop-view-inventory', JSON.stringify(next)); setShowInventory(next);`) so that even if the component remounts, the next mount reads the correct value."
+}
