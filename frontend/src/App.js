@@ -44,6 +44,8 @@ function App() {
   // ---- Domain state via custom hooks ----
   const [activeTab, setActiveTab] = useState('missions');
   const [currentDate, setCurrentDate] = useState(new Date());
+  // Lifted from ShopAndInventory so toggle survives child re-render cascades.
+  const [showShopInventoryView, setShowShopInventoryView] = useState(false);
 
   const wallet = useWallet();
   const leveling = useLeveling();
@@ -454,6 +456,8 @@ function App() {
             inventory={inventory.inventory}
             onPurchase={handlePurchase}
             onUseItem={handleUseItem}
+            showInventory={showShopInventoryView}
+            setShowInventory={setShowShopInventoryView}
           />
         )}
 

@@ -3,14 +3,11 @@ import { ShoppingBag, Package, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { SHOP_ITEMS, SHOP_CATEGORIES } from '../config/gameConfig';
 import { ITEM_EFFECTS, hasEffect } from '../config/itemEffects';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import EldenRune from './EldenRune';
 import { toast } from 'sonner';
 
-const ShopAndInventory = ({ totalRunes, inventory, onPurchase, onUseItem }) => {
+const ShopAndInventory = ({ totalRunes, inventory, onPurchase, onUseItem, showInventory, setShowInventory }) => {
   const [activeCategory, setActiveCategory] = useState('all');
-  // Persist toggle so parent re-renders (auto-sync cascade) can't reset it back to shop view.
-  const [showInventory, setShowInventory] = useLocalStorage('epic-grind-shop-view-inventory', false);
 
   const filteredItems = activeCategory === 'all' 
     ? SHOP_ITEMS 
