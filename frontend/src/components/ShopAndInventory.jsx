@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Package, Check, Sparkles } from 'lucide-react';
+import { ShoppingBag, Package } from 'lucide-react';
 import { Button } from './ui/button';
 import { SHOP_ITEMS, SHOP_CATEGORIES } from '../config/gameConfig';
 import EldenRune from './EldenRune';
@@ -103,14 +103,18 @@ const ShopAndInventory = ({ totalRunes, inventory, onPurchase }) => {
                   return acc;
                 }, {})
               ).map(([id, item]) => {
-                const Icon = item.icon;
+                // Re-hydrate icon and colors from SHOP_ITEMS config (icons can't be serialized to localStorage)
+                const shopItem = SHOP_ITEMS.find((si) => si.id === id);
+                const Icon = shopItem?.icon || Package;
+                const color = item.color || shopItem?.color || '#A855F7';
+                const bgColor = item.bgColor || shopItem?.bgColor || 'rgba(168, 85, 247, 0.15)';
                 return (
                   <div
                     key={id}
                     className="relative p-4 rounded-xl border transition-all hover:scale-105"
                     style={{
-                      backgroundColor: item.bgColor,
-                      borderColor: `${item.color}40`,
+                      backgroundColor: bgColor,
+                      borderColor: `${color}40`,
                     }}
                     data-testid={`inventory-item-${id}`}
                   >
@@ -118,7 +122,7 @@ const ShopAndInventory = ({ totalRunes, inventory, onPurchase }) => {
                     {item.count > 1 && (
                       <div 
                         className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ backgroundColor: item.color, color: '#000' }}
+                        style={{ backgroundColor: color, color: '#000' }}
                       >
                         {item.count}
                       </div>
@@ -127,9 +131,9 @@ const ShopAndInventory = ({ totalRunes, inventory, onPurchase }) => {
                     <div className="flex flex-col items-center text-center gap-2">
                       <div 
                         className="w-12 h-12 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${item.color}30` }}
+                        style={{ backgroundColor: `${color}30` }}
                       >
-                        <Icon className="w-6 h-6" style={{ color: item.color }} />
+                        <Icon className="w-6 h-6" style={{ color: color }} />
                       </div>
                       <span className="text-white font-medium text-sm">{item.name}</span>
                     </div>

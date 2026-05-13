@@ -3,23 +3,23 @@ import '@/App.css';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { getDateKey, addDays, isBeforeOrSame } from './utils/dateUtils';
 import { playRuneSound, playUncheckSound, playDeleteSound, playLevelUpSound } from './utils/sounds';
+import { calculateRewards, getLevelFromXP } from './config/gameConfig';
 import ProgressRing from './components/ProgressRing';
 import RunesWallet from './components/RunesWallet';
 import DateNavigator from './components/DateNavigator';
-import MissionItem, { XP_REWARDS, RUNE_REWARDS } from './components/MissionItem';
+import MissionItem from './components/MissionItem';
 import AddMissionModal from './components/AddMissionModal';
-import RewardShop from './components/RewardShop';
+import ShopAndInventory from './components/ShopAndInventory';
 import TrophyRoom, { HUNTER_RANKS } from './components/TrophyRoom';
 import RankUpAnimation from './components/RankUpAnimation';
 import HunterRankUpModal from './components/HunterRankUpModal';
 import LevelUpAnimation from './components/LevelUpAnimation';
 import PenaltyQuest from './components/PenaltyQuest';
-import ShadowInventory from './components/ShadowInventory';
 import StatusPage from './components/StatusPage';
-import XPBar, { getLevelFromXP } from './components/XPBar';
+import XPBar from './components/XPBar';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Lock, Scroll, ShoppingBag, Trophy, Settings, User } from 'lucide-react';
+import { Lock, Scroll, ShoppingBag, Trophy, User } from 'lucide-react';
 
 // Penalty quest options
 const PENALTY_QUESTS = ['pushups', 'squats', 'plank', 'burpees'];
@@ -45,17 +45,16 @@ function App() {
   const [availablePoints, setAvailablePoints] = useLocalStorage('epic-grind-available-points', 0);
   const [lifetimeRunes, setLifetimeRunes] = useLocalStorage('epic-grind-lifetime-runes', 0);
   const [lifetimeMissions, setLifetimeMissions] = useLocalStorage('epic-grind-lifetime-missions', 0);
-  const [rewards, setRewards] = useLocalStorage('epic-grind-rewards', []);
-  const [shadowInventory, setShadowInventory] = useLocalStorage('epic-grind-shadow-inventory', []);
+  const [inventory, setInventory] = useLocalStorage('epic-grind-inventory', []);
   const [missionCounts, setMissionCounts] = useLocalStorage('epic-grind-mission-counts', { D: 0, C: 0, B: 0, A: 0, S: 0 });
   const [streakDays, setStreakDays] = useLocalStorage('epic-grind-streak-days', 0);
-  
+
   // Special features state
   const [shadowBuffData, setShadowBuffData] = useLocalStorage('epic-grind-shadow-buff', {});
   const [rankUpShown, setRankUpShown] = useLocalStorage('epic-grind-rankup-shown', {});
   const [hunterRankAchieved, setHunterRankAchieved] = useLocalStorage('epic-grind-hunter-rank-achieved', ['e-rank']);
   const [penaltyData, setPenaltyData] = useLocalStorage('epic-grind-penalty', { active: false });
-  
+
   // UI state
   const [runesAnimating, setRunesAnimating] = useState(false);
   const [justCompletedId, setJustCompletedId] = useState(null);
@@ -70,9 +69,6 @@ function App() {
 
   // Check if shadow buff is active for current day
   const hasShadowBuff = shadowBuffData[dateKey] === true;
-  
-  // Check if Elden Lord is achieved
-  const isEldenLord = lifetimeRunes >= 10000;
 
   // Get missions for current date (including recurring missions)
   const currentDayMissions = useMemo(() => {
@@ -93,8 +89,8 @@ function App() {
   ).length;
 
   // Check for 100% completion and trigger rank up
-  const completionPercentage = currentDayMissions.length > 0 
-    ? Math.round((completedCount / currentDayMissions.length) * 100) 
+  const completionPercentage = currentDayMissions.length > 0
+    ? Math.round((completedCount / currentDayMissions.length) * 100)
     : 0;
 
   // Check penalty status on mount and date change
@@ -108,7 +104,7 @@ function App() {
         }
         return mission.dateKey === yesterday;
       });
-      
+
       const yesterdayCompletedCount = yesterdayMissions.filter(
         (m) => yesterdayCompletions[m.id]
       ).length;
@@ -171,18 +167,19 @@ function App() {
     });
   }, [dateKey, currentDate, setMissions]);
 
-  // Toggle mission completion (Truth Reflection Patch)
+  // Toggle mission completion (uses calculateRewards from gameConfig)
   const handleToggleMission = useCallback((missionId) => {
     const mission = missions.find((m) => m.id === missionId);
     if (!mission) return;
 
     const wasCompleted = currentDayCompletions[missionId];
-    
-    // Calculate rewards based on current buff state
-    let runeValue = RUNE_REWARDS[mission.rank] || 10;
-    let xpValue = XP_REWARDS[mission.rank] || 50;
 
-    // Apply shadow buff multiplier (1.5x) if active and this isn't an A/S rank mission
+    // Calculate base rewards from central config (rank * multiplier)
+    const base = calculateRewards(mission.rank);
+    let runeValue = base.runes;
+    let xpValue = base.xp;
+
+    // Apply shadow buff (1.5x) when active and not A/S rank (since those trigger the buff)
     if (hasShadowBuff && mission.rank !== 'A' && mission.rank !== 'S') {
       runeValue = Math.floor(runeValue * 1.5);
       xpValue = Math.floor(xpValue * 1.5);
@@ -201,12 +198,12 @@ function App() {
       const newLifetimeMissions = lifetimeMissions + 1;
       const newTotalXP = totalXP + xpValue;
       const newLevel = getLevelFromXP(newTotalXP);
-      
+
       setTotalRunes((prev) => prev + runeValue);
       setLifetimeRunes((prev) => prev + runeValue);
       setLifetimeMissions(newLifetimeMissions);
       setTotalXP(newTotalXP);
-      
+
       // Check for level up
       if (newLevel > currentLevel) {
         const levelsGained = newLevel - currentLevel;
@@ -216,16 +213,16 @@ function App() {
         setNewLevelReached(newLevel);
         setShowLevelUp(true);
       }
-      
+
       // Track mission counts by rank
       setMissionCounts((prev) => ({
         ...prev,
         [mission.rank]: (prev[mission.rank] || 0) + 1,
       }));
-      
+
       playRuneSound(mission.rank);
       playLevelUpSound();
-      
+
       setJustCompletedId(missionId);
       setRunesAnimating(true);
       setTimeout(() => {
@@ -234,7 +231,7 @@ function App() {
       }, 400);
 
       // Check for Hunter Rank Up
-      const newRank = HUNTER_RANKS.find(r => 
+      const newRank = HUNTER_RANKS.find(r =>
         r.threshold === newLifetimeMissions && !hunterRankAchieved.includes(r.id)
       );
       if (newRank) {
@@ -253,22 +250,22 @@ function App() {
           duration: 4000,
         });
       }
-      
+
       const buffText = hasShadowBuff && mission.rank !== 'A' && mission.rank !== 'S' ? ' (1.5x Buff!)' : '';
       toast.success(`+${xpValue} XP | +${runeValue} Runes${buffText}`, {
         description: `${mission.rank}-Rank mission completed`,
       });
     } else {
-      // --- UNCOMPLETING THE MISSION (THE PENALTY) ---
+      // --- UNCOMPLETING THE MISSION (Truth reflection) ---
       const newTotalXP = Math.max(0, totalXP - xpValue);
-      const newLevel = getLevelFromXP(newTotalXP); 
-      
+      const newLevel = getLevelFromXP(newTotalXP);
+
       setTotalRunes((prev) => Math.max(0, prev - runeValue));
       setLifetimeRunes((prev) => Math.max(0, prev - runeValue));
       setLifetimeMissions((prev) => Math.max(0, prev - 1));
       setTotalXP(newTotalXP);
       setCurrentLevel(newLevel);
-      
+
       setMissionCounts((prev) => ({
         ...prev,
         [mission.rank]: Math.max(0, (prev[mission.rank] || 0) - 1),
@@ -279,22 +276,23 @@ function App() {
         description: 'Mission revoked. Level adjusted.',
       });
     }
-  }, [missions, currentDayCompletions, dateKey, hasShadowBuff, shadowBuffData, lifetimeMissions, 
-      totalXP, currentLevel, hunterRankAchieved, showLevelUp, setCompletionData, setTotalRunes, 
+  }, [missions, currentDayCompletions, dateKey, hasShadowBuff, shadowBuffData, lifetimeMissions,
+      totalXP, currentLevel, hunterRankAchieved, showLevelUp, setCompletionData, setTotalRunes,
       setLifetimeRunes, setLifetimeMissions, setTotalXP, setCurrentLevel, setAvailablePoints,
       setShadowBuffData, setHunterRankAchieved, setMissionCounts]);
+
   // Delete a mission
   const handleDeleteMission = useCallback((missionId) => {
     const mission = missions.find((m) => m.id === missionId);
     if (!mission) return;
 
     if (currentDayCompletions[missionId]) {
-      const runeValue = RUNE_REWARDS[mission.rank] || 10;
-      setTotalRunes((prev) => Math.max(0, prev - runeValue));
+      const rewards = calculateRewards(mission.rank);
+      setTotalRunes((prev) => Math.max(0, prev - rewards.runes));
     }
 
     setMissions((prev) => prev.filter((m) => m.id !== missionId));
-    
+
     setCompletionData((prev) => {
       const newData = { ...prev };
       Object.keys(newData).forEach((key) => {
@@ -311,62 +309,38 @@ function App() {
     });
   }, [missions, currentDayCompletions, setMissions, setCompletionData, setTotalRunes]);
 
-  // Add a new reward
-  const handleAddReward = useCallback((rewardData) => {
-    const newReward = {
-      id: `reward-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: rewardData.name,
-      cost: rewardData.cost,
-      colorTheme: rewardData.colorTheme,
-    };
-    setRewards((prev) => [...prev, newReward]);
-  }, [setRewards]);
-
-  // Buy a reward
-  const handleBuyReward = useCallback((rewardId) => {
-    const reward = rewards.find((r) => r.id === rewardId);
-    if (!reward || totalRunes < reward.cost) return;
-
-    setTotalRunes((prev) => prev - reward.cost);
+  // Purchase an item from the unified shop (adds to inventory)
+  const handlePurchaseItem = useCallback((item) => {
+    if (totalRunes < item.cost) return;
+    setTotalRunes((prev) => prev - item.cost);
     setRunesAnimating(true);
     setTimeout(() => setRunesAnimating(false), 400);
-  }, [rewards, totalRunes, setTotalRunes]);
-
-  // Delete a reward
-  const handleDeleteReward = useCallback((rewardId) => {
-    setRewards((prev) => prev.filter((r) => r.id !== rewardId));
-  }, [setRewards]);
-
-  // Shadow Inventory handlers
-  const handleAddInventoryItem = useCallback((itemData) => {
-    const newItem = {
-      id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...itemData,
-      unlocked: itemData.condition?.type === 'none',
-    };
-    setShadowInventory((prev) => [...prev, newItem]);
-  }, [setShadowInventory]);
-
-  const handleUpdateInventoryItem = useCallback((itemId, itemData) => {
-    setShadowInventory((prev) => 
-      prev.map((item) => item.id === itemId ? { ...item, ...itemData } : item)
-    );
-  }, [setShadowInventory]);
-
-  const handleDeleteInventoryItem = useCallback((itemId) => {
-    setShadowInventory((prev) => prev.filter((item) => item.id !== itemId));
-  }, [setShadowInventory]);
+    setInventory((prev) => [
+      ...prev,
+      {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        cost: item.cost,
+        color: item.color,
+        bgColor: item.bgColor,
+        category: item.category,
+        // Note: icon component is re-resolved at render time from SHOP_ITEMS config
+        purchasedAt: new Date().toISOString(),
+      },
+    ]);
+  }, [totalRunes, setTotalRunes, setInventory]);
 
   // Allocate attribute point
   const handleAllocatePoint = useCallback((attributeId) => {
     if (availablePoints <= 0) return;
-    
+
     setAttributes((prev) => ({
       ...prev,
       [attributeId]: (prev[attributeId] || 10) + 1,
     }));
     setAvailablePoints((prev) => prev - 1);
-    
+
     toast.success(`+1 ${attributeId.charAt(0).toUpperCase() + attributeId.slice(1)}`, {
       description: `${availablePoints - 1} points remaining`,
     });
@@ -374,10 +348,10 @@ function App() {
 
   // Complete penalty quest
   const handleCompletePenalty = useCallback(() => {
-    setPenaltyData({ 
-      active: false, 
+    setPenaltyData({
+      active: false,
       clearedDate: today,
-      lastCheckedDate: penaltyData.lastCheckedDate 
+      lastCheckedDate: penaltyData.lastCheckedDate
     });
     setStreakDays((prev) => prev + 1);
     toast.success('Penalty Quest Complete!', {
@@ -387,7 +361,7 @@ function App() {
 
   // Handle tab change with penalty lock
   const handleTabChange = useCallback((tabId) => {
-    if (penaltyData.active && (tabId === 'shop' || tabId === 'trophies' || tabId === 'inventory' || tabId === 'status')) {
+    if (penaltyData.active && (tabId === 'shop' || tabId === 'trophies' || tabId === 'status')) {
       toast.error('Access Locked!', {
         description: 'Complete the Penalty Quest first.',
       });
@@ -403,18 +377,16 @@ function App() {
   }));
 
   // Determine background class based on penalty mode
-  const bgClass = penaltyData.active 
+  const bgClass = penaltyData.active
     ? 'min-h-screen bg-gradient-to-b from-red-950/30 to-[#131314] text-white font-body'
     : 'min-h-screen bg-[#131314] text-white font-body';
 
   return (
-   <div className={bgClass}>
-    
-
+    <div className={bgClass}>
       {/* Rank Up Animation (100% daily completion) */}
       <RankUpAnimation
-        show={showRankUp} 
-        onComplete={() => setShowRankUp(false)} 
+        show={showRankUp}
+        onComplete={() => setShowRankUp(false)}
       />
 
       {/* Hunter Rank Up Modal */}
@@ -437,23 +409,23 @@ function App() {
       {/* Anime character backgrounds */}
       <div className="anime-bg-left" />
       <div className="anime-bg-right" />
-      
+
       {/* Noise texture overlay */}
       <div className="noise-overlay" />
-      
+
       {/* Fixed Header */}
       <header className="sticky top-0 z-50 bg-[#131314]/95 backdrop-blur-sm border-b border-zinc-800">
         {/* Top bar with wallet */}
         <div className="flex justify-end px-4 py-3">
-          <RunesWallet 
-            runes={totalRunes} 
-            isAnimating={runesAnimating} 
+          <RunesWallet
+            runes={totalRunes}
+            isAnimating={runesAnimating}
             hasShadowBuff={hasShadowBuff}
           />
         </div>
-        
+
         {/* Navigation */}
-        <nav 
+        <nav
           className="flex items-center justify-center gap-1 sm:gap-2 bg-[#1a1a1b] border-b border-zinc-800 px-2 sm:px-4 py-3 overflow-x-auto"
           data-testid="navigation"
         >
@@ -462,8 +434,8 @@ function App() {
             className={`
               flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-lg font-medium text-sm sm:text-base
               transition-all duration-200 whitespace-nowrap slide-in-up
-              ${activeTab === 'missions' 
-                ? 'bg-runes/20 text-runes border border-runes/30' 
+              ${activeTab === 'missions'
+                ? 'bg-runes/20 text-runes border border-runes/30'
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
               }
             `}
@@ -472,14 +444,14 @@ function App() {
             <Scroll className="w-4 h-4" />
             <span className="hidden sm:inline">Missions</span>
           </button>
-          
+
           <button
             onClick={() => handleTabChange('status')}
             className={`
               flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-lg font-medium text-sm sm:text-base
               transition-all duration-200 whitespace-nowrap slide-in-up
-              ${activeTab === 'status' 
-                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
+              ${activeTab === 'status'
+                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
               }
               ${penaltyData.active ? 'opacity-50' : ''}
@@ -490,14 +462,14 @@ function App() {
             <User className="w-4 h-4" />
             <span className="hidden sm:inline">Status</span>
           </button>
-          
+
           <button
             onClick={() => handleTabChange('shop')}
             className={`
               flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-lg font-medium text-sm sm:text-base
               transition-all duration-200 whitespace-nowrap slide-in-up
-              ${activeTab === 'shop' 
-                ? 'bg-runes/20 text-runes border border-runes/30' 
+              ${activeTab === 'shop'
+                ? 'bg-runes/20 text-runes border border-runes/30'
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
               }
               ${penaltyData.active ? 'opacity-50' : ''}
@@ -508,14 +480,14 @@ function App() {
             <ShoppingBag className="w-4 h-4" />
             <span className="hidden sm:inline">Shop</span>
           </button>
-          
+
           <button
             onClick={() => handleTabChange('trophies')}
             className={`
               flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-lg font-medium text-sm sm:text-base
               transition-all duration-200 whitespace-nowrap slide-in-up
-              ${activeTab === 'trophies' 
-                ? 'bg-runes/20 text-runes border border-runes/30' 
+              ${activeTab === 'trophies'
+                ? 'bg-runes/20 text-runes border border-runes/30'
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
               }
               ${penaltyData.active ? 'opacity-50' : ''}
@@ -526,24 +498,6 @@ function App() {
             <Trophy className="w-4 h-4" />
             <span className="hidden sm:inline">Trophies</span>
           </button>
-          
-          <button
-            onClick={() => handleTabChange('inventory')}
-            className={`
-              flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-lg font-medium text-sm sm:text-base
-              transition-all duration-200 whitespace-nowrap slide-in-up
-              ${activeTab === 'inventory' 
-                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-              }
-              ${penaltyData.active ? 'opacity-50' : ''}
-            `}
-            data-testid="nav-tab-inventory"
-          >
-            {penaltyData.active && <Lock className="w-3 h-3 text-red-400" />}
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Inventory</span>
-          </button>
         </nav>
       </header>
 
@@ -551,8 +505,8 @@ function App() {
       <main className="content-overlay max-w-2xl mx-auto px-4 py-6 relative z-10">
         {/* Penalty Quest Banner */}
         {penaltyData.active && (
-          <PenaltyQuest 
-            penaltyData={penaltyData} 
+          <PenaltyQuest
+            penaltyData={penaltyData}
             onCompletePenalty={handleCompletePenalty}
           />
         )}
@@ -562,7 +516,7 @@ function App() {
           <div className="space-y-6 slide-in-right">
             {/* XP Bar */}
             <XPBar totalXP={totalXP} level={currentLevel} />
-            
+
             {/* Date Navigator */}
             <DateNavigator
               currentDate={currentDate}
@@ -584,8 +538,8 @@ function App() {
                 Mission Log
               </h2>
               <div className="flex justify-center mb-6">
-  <AddMissionModal onAddMission={handleAddMission} />
-</div>
+                <AddMissionModal onAddMission={handleAddMission} />
+              </div>
               {missionsWithStatus.length === 0 ? (
                 <div className="text-center py-12 text-zinc-500 bg-[#1a1a1b] rounded-xl border border-zinc-800" data-testid="empty-missions">
                   <p className="text-lg mb-2">No missions for this day</p>
@@ -605,9 +559,6 @@ function App() {
                 </div>
               )}
             </section>
-
-            {/* Add Mission Button */}
-
           </div>
         )}
 
@@ -623,17 +574,13 @@ function App() {
           />
         )}
 
-        {/* Reward Shop Tab */}
+        {/* Unified Shop & Inventory Tab */}
         {activeTab === 'shop' && (
-          <div className="slide-in-right">
-            <RewardShop
-              rewards={rewards}
-              onAddReward={handleAddReward}
-              onBuyReward={handleBuyReward}
-              onDeleteReward={handleDeleteReward}
-              totalRunes={totalRunes}
-            />
-          </div>
+          <ShopAndInventory
+            totalRunes={totalRunes}
+            inventory={inventory}
+            onPurchase={handlePurchaseItem}
+          />
         )}
 
         {/* Trophy Room Tab */}
@@ -645,27 +592,11 @@ function App() {
             />
           </div>
         )}
-
-        {/* Shadow Inventory Tab */}
-        {activeTab === 'inventory' && (
-          <div className="slide-in-right">
-            <ShadowInventory
-              items={shadowInventory}
-              onAddItem={handleAddInventoryItem}
-              onUpdateItem={handleUpdateInventoryItem}
-              onDeleteItem={handleDeleteInventoryItem}
-              streakDays={streakDays}
-              missionCounts={missionCounts}
-              hunterRankAchieved={hunterRankAchieved}
-              isEldenLord={isEldenLord}
-            />
-          </div>
-        )}
       </main>
 
       {/* Toast notifications */}
-      <Toaster 
-        position="bottom-center" 
+      <Toaster
+        position="bottom-center"
         theme="dark"
         toastOptions={{
           style: {
