@@ -1,91 +1,29 @@
 import React, { useState } from 'react';
-import { Trash2, Check, Zap } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { Trash2, Check } from 'lucide-react';
+import { Button } from './ui/button';
+import { RANK_CONFIG, calculateRewards } from '../config/gameConfig';
 import EldenRune from './EldenRune';
-
-const RANK_STYLES = {
-  D: {
-    border: 'border-l-rank-d',
-    bg: 'bg-zinc-500/10',
-    glow: '0 0 10px rgba(113, 113, 122, 0.3)',
-    text: 'text-rank-d',
-    checkBg: 'bg-rank-d',
-  },
-  C: {
-    border: 'border-l-rank-c',
-    bg: 'bg-emerald-500/10',
-    glow: '0 0 15px rgba(16, 185, 129, 0.4)',
-    text: 'text-rank-c',
-    checkBg: 'bg-rank-c',
-  },
-  B: {
-    border: 'border-l-rank-b',
-    bg: 'bg-blue-500/10',
-    glow: '0 0 20px rgba(59, 130, 246, 0.5)',
-    text: 'text-rank-b',
-    checkBg: 'bg-rank-b',
-  },
-  A: {
-    border: 'border-l-rank-a',
-    bg: 'bg-purple-500/10',
-    glow: '0 0 25px rgba(168, 85, 247, 0.6)',
-    text: 'text-rank-a',
-    checkBg: 'bg-rank-a',
-  },
-  S: {
-    border: 'border-l-rank-s',
-    bg: 'bg-yellow-500/15',
-    glow: '0 0 30px rgba(234, 179, 8, 0.8)',
-    text: 'text-rank-s',
-    checkBg: 'bg-rank-s',
-  },
-};
-
-const RANK_LABELS = {
-  D: 'Routine',
-  C: 'Normal',
-  B: 'Hard',
-  A: 'Very Hard',
-  S: 'Epic',
-};
-
-// XP rewards per rank
-const XP_REWARDS = {
-  D: 50,
-  C: 100,
-  B: 200,
-  A: 350,
-  S: 500,
-};
-
-// Rune rewards per rank
-const RUNE_REWARDS = {
-  D: 10,
-  C: 20,
-  B: 50,
-  A: 100,
-  S: 200,
-};
 
 const MissionItem = ({ mission, onToggle, onDelete, isJustCompleted = false }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const style = RANK_STYLES[mission.rank] || RANK_STYLES.D;
-  const xpReward = XP_REWARDS[mission.rank] || 50;
-  const runeReward = RUNE_REWARDS[mission.rank] || 10;
+  const rankConfig = RANK_CONFIG[mission.rank] || RANK_CONFIG.D;
+  const RankIcon = rankConfig.icon;
+  const rewards = calculateRewards(mission.rank);
   
   return (
     <div
       className={`
-        ${style.bg} ${style.border}
-        border-l-4 rounded-r-lg p-4
+        rounded-xl p-4 border-l-4
         flex items-center justify-between gap-4
         group transition-all duration-300
-        hover:bg-zinc-800/50
-        ${mission.completed ? 'opacity-70' : ''}
+        hover:scale-[1.01]
+        ${mission.completed ? 'opacity-60' : ''}
         ${isJustCompleted ? 'check-pop' : ''}
       `}
       style={{
-        boxShadow: isHovered ? style.glow : 'none',
+        backgroundColor: rankConfig.bgColor,
+        borderLeftColor: rankConfig.color,
+        boxShadow: isHovered ? `0 0 20px ${rankConfig.glowColor}` : 'none',
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -96,59 +34,73 @@ const MissionItem = ({ mission, onToggle, onDelete, isJustCompleted = false }) =
         <button
           onClick={() => onToggle(mission.id)}
           className={`
-            w-7 h-7 rounded-md border-2 flex items-center justify-center
+            w-8 h-8 rounded-lg border-2 flex items-center justify-center
             transition-all duration-200 flex-shrink-0
-            ${mission.completed 
-              ? `${style.checkBg} border-transparent` 
-              : `border-zinc-600 hover:border-zinc-400 bg-transparent`
-            }
           `}
+          style={{
+            borderColor: mission.completed ? rankConfig.color : '#52525b',
+            backgroundColor: mission.completed ? rankConfig.color : 'transparent',
+          }}
           data-testid={`mission-checkbox-${mission.id}`}
           aria-label={mission.completed ? 'Mark as incomplete' : 'Mark as complete'}
         >
           {mission.completed && (
-            <Check className="w-4 h-4 text-white" strokeWidth={3} />
+            <Check className="w-5 h-5 text-white" strokeWidth={3} />
           )}
         </button>
         
         {/* Mission content */}
         <div className="flex flex-col min-w-0 flex-1">
-          <div className="relative">
+          <div className="flex items-center gap-2">
             <span 
               className={`
-                text-lg font-medium text-white
+                text-lg font-medium
                 transition-all duration-300
-                ${mission.completed ? 'text-zinc-500' : ''}
+                ${mission.completed ? 'line-through text-zinc-500' : 'text-white'}
               `}
               data-testid={`mission-name-${mission.id}`}
             >
               {mission.name}
             </span>
-            {mission.completed && (
-              <div 
-                className="absolute top-1/2 left-0 h-0.5 bg-zinc-500 strike-line"
-                style={{ width: '100%' }}
-              />
-            )}
           </div>
           
-          <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <span className={`text-sm font-semibold ${style.text}`}>
-              {mission.rank}-Rank
-            </span>
-            <span className="text-xs text-zinc-500">
-              ({RANK_LABELS[mission.rank]})
-            </span>
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
+            {/* Rank Badge */}
+            <div 
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
+              style={{ 
+                backgroundColor: `${rankConfig.color}20`,
+                border: `1px solid ${rankConfig.borderColor}`,
+              }}
+            >
+              <RankIcon className="w-4 h-4" style={{ color: rankConfig.color }} />
+              <span 
+                className="text-sm font-bold"
+                style={{ color: rankConfig.color }}
+              >
+                {rankConfig.name}
+              </span>
+            </div>
             
+            {/* Multiplier Badge */}
+            <span 
+              className="text-xs px-2 py-0.5 rounded"
+              style={{ 
+                backgroundColor: `${rankConfig.color}20`,
+                color: rankConfig.color,
+              }}
+            >
+              {rankConfig.multiplier}x Rewards
+            </span>
+
             {/* Rewards Display */}
             <div className="flex items-center gap-3 ml-auto">
-              <div className="flex items-center gap-1 text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">
-                <Zap className="w-3 h-3" />
-                <span className="text-xs font-bold">+{xpReward} XP</span>
+              <div className="flex items-center gap-1 text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg border border-blue-500/30">
+                <span className="text-xs font-bold">+{rewards.xp} XP</span>
               </div>
-              <div className="flex items-center gap-1 text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded">
+              <div className="flex items-center gap-1 text-yellow-400 bg-yellow-500/10 px-2 py-1 rounded-lg border border-yellow-500/30">
                 <EldenRune size={14} />
-                <span className="text-xs font-bold">+{runeReward}</span>
+                <span className="text-xs font-bold">+{rewards.runes}</span>
               </div>
             </div>
             
@@ -176,5 +128,4 @@ const MissionItem = ({ mission, onToggle, onDelete, isJustCompleted = false }) =
   );
 };
 
-export { XP_REWARDS, RUNE_REWARDS };
 export default MissionItem;

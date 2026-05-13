@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Zap, Star, ArrowUp } from 'lucide-react';
 
 const LEVEL_UP_SOUND = 'https://cdn.pixabay.com/audio/2022/03/15/audio_783d1a013f.mp3';
 
 const LevelUpAnimation = ({ show, newLevel, onComplete }) => {
   const [isVisible, setIsVisible] = useState(false);
+
+  // Handle dismissal - tap/click anywhere to close
+  const handleDismiss = useCallback(() => {
+    setIsVisible(false);
+    onComplete?.();
+  }, [onComplete]);
 
   useEffect(() => {
     if (show) {
@@ -15,34 +21,37 @@ const LevelUpAnimation = ({ show, newLevel, onComplete }) => {
       audio.volume = 0.6;
       audio.play().catch(e => console.log('Audio play failed:', e));
       
-      // Hide after 3 seconds
+      // Auto-hide after 3 seconds (but can be dismissed earlier)
       const timer = setTimeout(() => {
-        setIsVisible(false);
-        onComplete?.();
+        handleDismiss();
       }, 3000);
       
       return () => clearTimeout(timer);
     }
-  }, [show, onComplete]);
+  }, [show, handleDismiss]);
 
   if (!isVisible) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none"
+      className="fixed inset-0 z-[300] flex items-center justify-center cursor-pointer"
+      onClick={handleDismiss}
+      onTouchEnd={handleDismiss}
       data-testid="level-up-animation"
+      role="button"
+      aria-label="Click to dismiss level up animation"
     >
       {/* Purple flash overlay */}
       <div 
         className="absolute inset-0 animate-pulse"
         style={{ 
-          background: 'radial-gradient(circle at center, rgba(168, 85, 247, 0.4) 0%, rgba(88, 28, 135, 0.6) 50%, rgba(0, 0, 0, 0.8) 100%)',
+          background: 'radial-gradient(circle at center, rgba(168, 85, 247, 0.4) 0%, rgba(88, 28, 135, 0.6) 50%, rgba(0, 0, 0, 0.9) 100%)',
           animation: 'purpleFlash 0.5s ease-out',
         }}
       />
       
       {/* Particle effects */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -59,7 +68,7 @@ const LevelUpAnimation = ({ show, newLevel, onComplete }) => {
       </div>
       
       {/* Main content */}
-      <div className="relative flex flex-col items-center gap-6">
+      <div className="relative flex flex-col items-center gap-6 pointer-events-none">
         {/* Glowing rings */}
         <div 
           className="absolute w-80 h-80 rounded-full animate-ping opacity-20"
@@ -107,6 +116,11 @@ const LevelUpAnimation = ({ show, newLevel, onComplete }) => {
         
         <p className="text-lg text-purple-200 animate-pulse">
           +5 Attribute Points Available!
+        </p>
+
+        {/* Tap to dismiss hint */}
+        <p className="text-sm text-purple-400/60 mt-4 animate-pulse">
+          Tap anywhere to continue
         </p>
       </div>
     </div>

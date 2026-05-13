@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, X } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import {
   Dialog,
   DialogContent,
@@ -10,22 +10,16 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from '../components/ui/dialog';
+} from './ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
-
-const RANKS = [
-  { value: 'D', label: 'D-Rank (Routine)', color: '#71717A', runes: 10 },
-  { value: 'C', label: 'C-Rank (Normal)', color: '#10B981', runes: 20 },
-  { value: 'B', label: 'B-Rank (Hard)', color: '#3B82F6', runes: 50 },
-  { value: 'A', label: 'A-Rank (Very Hard)', color: '#A855F7', runes: 100 },
-  { value: 'S', label: 'S-Rank (Epic)', color: '#EAB308', runes: 200 },
-];
+} from './ui/select';
+import { RANK_CONFIG, calculateRewards } from '../config/gameConfig';
+import EldenRune from './EldenRune';
 
 const REPEAT_OPTIONS = [
   { value: 'once', label: 'Just Once' },
@@ -55,7 +49,9 @@ const AddMissionModal = ({ onAddMission }) => {
     setOpen(false);
   };
 
-  const selectedRank = RANKS.find(r => r.value === rank);
+  const selectedRank = RANK_CONFIG[rank];
+  const RankIcon = selectedRank?.icon;
+  const rewards = calculateRewards(rank);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -76,7 +72,7 @@ const AddMissionModal = ({ onAddMission }) => {
             New Mission
           </DialogTitle>
           <DialogDescription className="text-zinc-500">
-            Create a new task to track your progress and earn Runes
+            Create a new quest to earn XP and Runes
           </DialogDescription>
         </DialogHeader>
         
@@ -110,23 +106,31 @@ const AddMissionModal = ({ onAddMission }) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-700">
-                {RANKS.map((r) => (
-                  <SelectItem 
-                    key={r.value} 
-                    value={r.value}
-                    className="text-white hover:bg-zinc-800 cursor-pointer"
-                    data-testid={`rank-option-${r.value}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: r.color }}
-                      />
-                      <span>{r.label}</span>
-                      <span className="text-zinc-500 text-sm">+{r.runes} Runes</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                {Object.entries(RANK_CONFIG).map(([key, config]) => {
+                  const Icon = config.icon;
+                  const rankRewards = calculateRewards(key);
+                  return (
+                    <SelectItem 
+                      key={key} 
+                      value={key}
+                      className="text-white hover:bg-zinc-800 cursor-pointer"
+                      data-testid={`rank-option-${key}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5" style={{ color: config.color }} />
+                        <span style={{ color: config.color }} className="font-bold">
+                          {config.name}
+                        </span>
+                        <span className="text-zinc-500 text-sm">
+                          ({config.label})
+                        </span>
+                        <span className="text-zinc-400 text-sm ml-auto">
+                          {config.multiplier}x
+                        </span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -159,22 +163,40 @@ const AddMissionModal = ({ onAddMission }) => {
           </div>
 
           {/* Preview */}
-          <div className="p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-            <p className="text-sm text-zinc-500 mb-2">Mission Preview</p>
+          <div 
+            className="p-4 rounded-xl border-2"
+            style={{ 
+              backgroundColor: selectedRank?.bgColor,
+              borderColor: selectedRank?.borderColor,
+            }}
+          >
+            <p className="text-sm text-zinc-400 mb-3">Mission Preview</p>
             <div className="flex items-center justify-between">
-              <span className="text-white font-medium">
-                {name || 'Your mission name'}
+              <div className="flex items-center gap-3">
+                {RankIcon && (
+                  <RankIcon 
+                    className="w-6 h-6" 
+                    style={{ color: selectedRank?.color }}
+                  />
+                )}
+                <span className="text-white font-medium">
+                  {name || 'Your mission name'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-3">
+              <span 
+                className="font-bold text-lg"
+                style={{ color: selectedRank?.color }}
+              >
+                {selectedRank?.name}
               </span>
-              <div className="flex items-center gap-2">
-                <span 
-                  className="font-bold"
-                  style={{ color: selectedRank?.color }}
-                >
-                  {rank}-Rank
-                </span>
-                <span className="text-runes text-sm">
-                  +{selectedRank?.runes} Runes
-                </span>
+              <span className="text-zinc-500">|</span>
+              <span className="text-blue-400 font-bold">+{rewards.xp} XP</span>
+              <span className="text-zinc-500">|</span>
+              <div className="flex items-center gap-1 text-yellow-400 font-bold">
+                <EldenRune size={16} />
+                +{rewards.runes}
               </div>
             </div>
           </div>
